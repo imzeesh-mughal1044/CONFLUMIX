@@ -8,7 +8,39 @@
 **Primary background:** Cool White
 **Design philosophy:** Unified, accessible, trustworthy, efficient, consistent, and responsive.
 
-> **Repository context note (read first).** This brief documents the *intended* frontend design system. At the time of writing, `apps/web/` contains no framework scaffolding (only a `.gitkeep` placeholder). The agreed and documented stack is **Next.js, React, TypeScript, and Tailwind CSS** (see `README.md` and `docs/structure.md`), and the frontend deployment target is **Vercel**. The guidance below is therefore written to be compatible with that planned stack, with implementation notes called out explicitly. No redesign or code change is performed by this document.
+> **Repository context note (read first).** The frontend is implemented in `apps/web/` with Next.js, React, TypeScript, and Tailwind CSS and targets Vercel. This document is the active standard for that implementation.
+
+## Marketplace-First Design Philosophy — Global Frontend Standard
+
+CONFLUMIX is one unified marketplace for new products, reuse, tasks and skills, and donations. Branding supports discovery; it never competes with it. Public discovery pages prioritize, in order: compact navigation and search, comprehensible modes/categories, real listings, filters and sorting, then supporting marketing. A user must see useful marketplace content without first crossing an oversized promotional hero.
+
+- Marketing explains the proposition briefly; marketplace discovery shows actual records, prices or budgets, conditions, availability, location, and the next action. Never substitute abstract decoration, fake metrics, ratings, testimonials, demand, or activity for real or clearly labeled demonstration data.
+- New-product cards prioritize image, title, price, stock, seller, and locality. Reuse adds condition. Tasks prioritize outcome, budget, skill, work style, and status. Donations distinguish offer from need and show quantity, condition when known, organization, urgency, and locality. These types share tokens and chrome but must not be flattened into semantically identical cards.
+- The header remains compact and predictable: official `CONFLUMIX_nav.png`, Marketplace and four mode destinations, searchable discovery, locality, and account access. Mobile uses a functional menu rather than silently removing navigation. The footer repeats only useful discovery, account, trust, and legal destinations.
+- Layout is mobile-first at 360 px and enhanced at 390 px, tablet, 1280 px, and 1440 px. Phone listing grids use two equal columns with 8–12 px gaps; images remain prominent and text truncates safely. No document-level horizontal scrolling is permitted. Controls remain at least 44 × 44 CSS pixels and grid/flex children use `min-width: 0`.
+- Local informative imagery uses meaningful alt text, reserved dimensions, framework optimization, appropriate crops, and a reliable fallback. Product/reuse cards default to square crops; banners may be landscape. Do not stretch images, use unrelated stock, or repeat one generic image across the catalogue.
+- Search submits to a shareable URL. Filters, mode tabs, locality, sorting, pagination/load-more, and clear actions preserve compatible query state and browser navigation. Desktop uses an inline filter panel; mobile uses an accessible drawer with explicit open and close controls.
+- Shared tokens govern deep teal and signal orange, surfaces, text, borders, semantic states, 4 px spacing, restrained 8–14 px radii, focus rings, and elevation. Shared shell, search, cards, explorer, tabs, drawers, empty states, and dialogs are reused instead of reimplemented per page.
+- Typography uses **Neue Montreal** as the single product typeface. Desktop page headings normally stay within 30–38 px unless a specific composition justifies otherwise; mobile headings are 26–30 px, sections 22–28 px, body 15–17 px, and controls 14–16 px. Listing typography favors scanning over editorial scale.
+- Motion communicates state only: short CSS transitions for hover, focus, drawers, and dialogs. No decorative floating, continuous motion, large staggered entrances, or interaction delays. Respect `prefers-reduced-motion`.
+- Desktop marketplace density uses five cards per row for featured homepage collections and four cards per row for explorer/discovery results when the available content width supports it. Phone layouts remain two columns. This density rule is the default for future marketplace groups.
+- Promotional carousels may contain three or four purposeful marketplace campaigns. They auto-advance at a calm interval, provide previous/next and direct-selection controls, pause during pointer or keyboard interaction, use local optimized imagery, and disable sliding motion when reduced motion is requested.
+- Homepage mode quick access begins as four compact controls. Selecting one expands in place to show a close control, mode image and explanation, real records for that mode, and a route to the complete filtered marketplace.
+- Loading reserves final layout with skeletons; empty states explain recovery; errors identify cause and next action; success states confirm the completed action without fabricating outcomes.
+- Semantic HTML, logical headings, keyboard operation, visible focus, labeled inputs and icon buttons, useful alt text, sufficient contrast, non-color status cues, Escape dismissal, and focus-safe sticky/overlay UI are required.
+- Avoid generic AI/SaaS motifs: giant abstract heroes, ornamental arcs, glows, glass surfaces, decorative badges, excessive gradients, unnecessary pills, repetitive rounded panels, and empty spacing that delays useful content.
+- Future groups must extend the same tokens, shell, responsive rules, entity hierarchy, URL conventions, state patterns, and honest-data standard. Deviations require a documented product reason.
+
+### Marketplace design review checklist
+
+- Does the first screen make search, locality, modes, and actual inventory easy to find?
+- Are every image, title, value, status, and action relevant to the record and free from fabricated claims?
+- Do product, reuse, task, and donation records expose their distinct decision-making metadata?
+- Do header, footer, filters, tabs, sorting, pagination, dialogs, and browser Back/Forward behave predictably?
+- Are loading, empty, error, and success states useful and honest?
+- Does keyboard navigation, focus, contrast, alt text, reduced motion, and 44 px target sizing pass review?
+- At 360 × 740 and 390 × 844, are two listing cards visible side by side with no horizontal overflow?
+- At 1280 × 800 and 1440 × 900, is the layout dense, aligned, image-led, and recognizably a marketplace?
 
 ---
 
@@ -251,6 +283,16 @@ If Tailwind CSS is already configured, map these values into the existing Tailwi
 
 ## 3. Logo and Brand Asset Rules
 
+### 3.0 Universal frontend logo asset
+
+`CONFLUMIX_nav.png` is the mandatory logo for every logo placement in the web application, including navigation, headers, authentication screens, and shared application chrome. The source asset lives at the repository root and its deployable copy must remain at `apps/web/public/CONFLUMIX_nav.png`.
+
+- Preserve the file's transparent background and intrinsic `990:185` aspect ratio.
+- Do not add a white card, pill, shadow, border, or decorative container behind the logo.
+- Do not stretch, crop, recolor, redraw, or replace it with text or another brand file.
+- Size it responsively and reserve its dimensions to prevent layout shift.
+- Keep sufficient clear space around the artwork and place it only where the original teal and orange artwork remains legible.
+
 ### 3.1 Official logo
 
 The official CONFLUMIX logo consists of:
@@ -298,42 +340,210 @@ Only generate or modify logo assets when the source file is available and the re
 
 ### 4.1 Typography direction
 
-Use a clean, modern sans-serif typeface. Prefer the existing approved project font if one is already configured. Otherwise, use **Inter** as the initial recommendation, with a sensible system-sans fallback.
+Use **Neue Montreal** as the single primary typeface throughout CONFLUMIX.
 
-Do not introduce multiple unrelated typefaces.
+Neue Montreal gives CONFLUMIX a distinctive, contemporary, confident, refined, and professional identity while remaining human, clean, and highly usable for a content-heavy multi-mode marketplace. Use it consistently across the product. Create hierarchy with Neue Montreal itself through size, weight, spacing, and composition rather than introducing another display or interface family.
 
-> **Repository note:** No font is configured yet because `apps/web/` is not scaffolded. When Next.js is initialized, prefer `next/font` (e.g., `next/font/google` for Inter) for optimal loading and to avoid layout shift. The suggested fallback stack is: `Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif`.
+**Do not add a second typeface.** Do not substitute a sans-serif for "clarity" in dense areas, and do not add a display or accent face for marketing surfaces. Hierarchy, density, and emphasis are solved with scale, weight, spacing, and layout.
 
-### 4.2 Type scale
+The interface should feel:
 
-| Style | Desktop size | Mobile size | Weight | Line height |
-|---|---:|---:|---:|---:|
-| Display | 48–56 px | 34–40 px | 700 | 1.1–1.2 |
-| H1 | 36–44 px | 30–34 px | 700 | 1.2 |
-| H2 | 28–32 px | 24–28 px | 650–700 | 1.25 |
-| H3 | 22–24 px | 20–22 px | 600 | 1.3 |
-| H4 | 18–20 px | 18 px | 600 | 1.35 |
-| Body Large | 18 px | 17–18 px | 400 | 1.6 |
-| Body | 16 px | 16 px | 400 | 1.5–1.65 |
-| Body Small | 14 px | 14 px | 400 | 1.5 |
-| Caption | 12–13 px | 12–13 px | 400 | 1.4 |
-| Button | 14–16 px | 14–16 px | 600 | 1.2 |
-| Navigation | 14–15 px | 14–16 px | 500–600 | 1.3 |
+- Refined
+- Professional
+- Distinctive
+- Contemporary
+- Confident
+- Clean
+- Human
+- Marketplace-focused
 
-These are guidelines, not a requirement to use every size on every page.
+Avoid making the interface look like a generic AI-generated SaaS website.
 
-### 4.3 Typography rules
+Specifically, do not use excessively large hero typography, unnecessary bold text, excessive uppercase text, exaggerated letter spacing, or too many different text sizes.
+
+Maintain a clear hierarchy between page titles, section headings, card titles, body text, labels, metadata, and supporting information:
+
+| Level | Purpose |
+|---|---|
+| Page title | One per page. |
+| Section heading | Groups content within a page. |
+| Card title | Product, task, donation, and metric card titles. |
+| Body text | Descriptions, instructions, and long-form content. |
+| Label | Form labels, table headers, filter names, button text. |
+| Metadata | Timestamps, locations, counts, helper text. |
+
+The typography must work with the actual content density of CONFLUMIX, especially product listings, task listings, donation listings, forms, dashboards, filters, tables, and analytics.
+
+### 4.2 Where Neue Montreal is applied
+
+Apply Neue Montreal to every typographic surface, including:
+
+- Main page headings.
+- Section headings.
+- Product, reuse, task, and donation listing titles.
+- Product prices and marketplace data.
+- Navigation.
+- Buttons.
+- Search, filters, sorting controls, forms, input fields, and labels.
+- Body text.
+- Supporting text.
+- Cards.
+- Status badges, dashboard content, analytics, tables, dialogs, notifications, metadata, and other supporting interface text.
+
+There are no typographic exceptions inside the product. Logos, icons, charts, and imagery are the only non-typographic elements.
+
+### 4.3 Font availability, loading, and fallback
+
+> **Repository note:** The frontend is scaffolded and configured to request Neue Montreal as its primary family. No licensed Neue Montreal font files are currently present in the repository. To guarantee identical rendering across platforms, obtain properly licensed WOFF2 files from the rights holder and serve them locally. Until those assets are supplied, the browser uses the declared neutral system sans-serif fallback without presenting it as Neue Montreal.
+
+Implementation guidance:
+
+- Use `next/font/local` with licensed Neue Montreal WOFF2 files when they are supplied. Do not replace Neue Montreal with a visually similar webfont or introduce a second branded family.
+- Declare only the weights that exist: `400` (Regular), `500` (Medium), `600` (Semibold), `700` (Bold). Add italic files only if italic is used under the rules in §4.5.
+- Set `display: "swap"` and preload the regular and semibold files.
+- Do not synthesize bold or italic in the browser. If a weight is missing, use a real available weight instead of a faux one.
+- Fallback stack for platforms without the font:
+
+```css
+--font-family-primary: "Neue Montreal", "Helvetica Neue", Arial, sans-serif;
+```
+
+- Expect the fallback to have different metrics. Avoid layouts that depend on exact glyph widths (for example, fixed-width buttons sized from their text) and verify wrapping in the fallback before release.
+- In Figma, install the licensed Neue Montreal family for the design team, create shared library styles, and distribute those styles through the team library rather than as per-file copies.
+
+### 4.4 Type scale
+
+Neue Montreal has clear, contemporary proportions suited to dense interfaces. The scale below balances marketplace scanning, readable descriptions, compact controls, and confident headings without turning the product into an oversized landing-page composition.
+
+| Style | Desktop | Tablet (768–1024) | Mobile (360–740) | Weight | Line height | Tracking |
+|---|---:|---:|---:|---:|---:|---:|
+| Display | 44–52 px | 40–46 px | 32–36 px | 600 | 1.15 | -0.01em |
+| H1 — page title | 34–40 px | 32–36 px | 28–30 px | 600 | 1.2 | -0.01em |
+| H2 — section heading | 26–30 px | 24–28 px | 22–26 px | 600 | 1.25 | 0 |
+| H3 — card / subsection title | 21–23 px | 20–22 px | 19–21 px | 600 | 1.3 | 0 |
+| H4 — label heading | 18–20 px | 18–20 px | 17–18 px | 600 | 1.35 | 0 |
+| Body Large | 18–19 px | 18–19 px | 17–18 px | 400 | 1.6 | 0 |
+| Body | 17 px | 17 px | 16–17 px | 400 | 1.6 | 0 |
+| Body Small | 15–16 px | 15–16 px | 15 px | 400 | 1.55 | 0 |
+| Caption / metadata | 13–14 px | 13–14 px | 13 px | 400 | 1.45 | 0.01em |
+| Button | 16 px | 16 px | 15–16 px | 600 | 1.2 | 0.01em |
+| Navigation | 16–17 px | 16–17 px | 15–16 px | 500 | 1.3 | 0.01em |
+| Price | 22–26 px | 21–24 px | 20–22 px | 600 | 1.15 | 0 |
+| Data / table cell | 15–16 px | 15–16 px | 15 px | 400 | 1.45 | 0 |
+
+Rules for using the scale:
+
+- These are guidelines, not a requirement to use every size on every page.
+- Use a small, fixed subset of steps in any single view. Do not introduce one-off sizes.
+- Display is reserved for sparse, low-density entry points such as a marketplace mode landing header. It must not be used on listing, form, dashboard, or table pages.
+- Body text is never smaller than 16 px and metadata is never smaller than 13 px. Do not shrink copy to fit more content into a viewport.
+- Small text still requires disciplined contrast and spacing. Prefer fewer, readable labels over dense micro-labels.
+
+### 4.5 Weight, emphasis, and case
+
+Use these available Neue Montreal weights intentionally. Only these roles may be used.
+
+| Weight | Name | Use for |
+|---:|---|---|
+| 400 | Regular | Body text, descriptions, supporting information, metadata, table cells, and general UI content |
+| 500 | Medium | Navigation, filters, input text, labels, tab labels, and moderate emphasis |
+| 600 | Semibold | Buttons, card titles, prices, and important interface elements where needed |
+| 700 | Bold | Major headings and high-emphasis content only |
+
+Rules:
+
+- Do not use weights below 400 or above 700, and never rely on faux bold.
+- Use consistent font weights for equivalent heading levels across all four modes.
+- Bold is the scarcest style in the system. If more than one element on a screen needs bold, the hierarchy is wrong. Reduce the number of weights rather than introducing another typeface or size.
+- Keep italic limited to rare editorial notes, quotations, and legal or explanatory copy at 16 px and above. Do not use italic for labels, metadata, or compact interface text; use wording, spacing, color, or weight instead.
+- Avoid all-uppercase body text and labels. Where a short uppercase overline is used (rare), set it at 12–13 px with modest tracking (`0.06em`), and do not use it for anything a user must read quickly.
+- Keep letter spacing neutral. Tracking above `0.08em` is prohibited, and negative tracking is allowed only on Display, H1, and H2 at the values listed in §4.4.
+- Use tabular figures for prices, statistics, dates, and any number that appears in columns. Keep proportional figures for running text.
+
+### 4.6 Typography rules
 
 - Use `#14201F` for headings and primary body text.
 - Use `#526365` for supporting descriptions.
-- Use `#718083` for secondary metadata where contrast remains adequate.
+- Use `#718083` for secondary metadata where contrast remains adequate. At 13–14 px, prefer `#526365` whenever the lighter token does not meet the required contrast.
 - Use consistent font weights for equivalent heading levels.
 - Avoid all-uppercase body text.
-- Reserve letter spacing for compact labels, navigation if appropriate, and small overlines.
-- Use readable paragraph widths.
+- Reserve letter spacing for compact labels, small overlines, and the tracking values listed in §4.4.
+- Use readable paragraph widths: roughly 60–75 characters per line for body text. Listings and cards may be narrower.
 - Use tabular numerals for prices, statistics, and time-sensitive numeric information where helpful.
-- Avoid excessively thin fonts for small text.
+- Avoid excessively thin rendering of small text. If text looks faint against the background, increase the weight to 500 or darken the text color instead of switching typeface.
+- Keep numerals, currency symbols, and units aligned in tables and price rows.
+- Truncate long titles with an ellipsis rather than wrapping them onto three lines inside a card, and keep the full title available as an accessible name.
 - Never use orange body text for lengthy paragraphs on white backgrounds.
+
+### 4.7 Responsive typography
+
+Typography must remain readable and visually balanced at every supported width while preserving the same Neue Montreal identity and hierarchy.
+
+| Viewport | Reference | Typography behavior |
+|---|---|---|
+| Mobile | 360 × 740 px | H1 28–30 px; H2 22–26 px; body 16–17 px; metadata 13 px. Tighten heading line height rather than body line height. |
+| Tablet | 768–1024 px | H1 32–36 px; H2 24–28 px; body 17 px; metadata 13–14 px. |
+| Desktop | 1024 px and above | H1 34–40 px; H2 26–30 px; body 17 px; metadata 13–14 px. |
+
+Rules:
+
+- Scale type down, never below the floors in §4.4.
+- Keep the same hierarchy order and the same weight assignments across breakpoints. Only size, line height, and spacing change.
+- Reduce paragraph measure on wide screens instead of increasing body size.
+- Keep body line height generous on small screens (1.55–1.65), where longer words wrap earlier.
+- Never reduce metadata below 13 px to fit a filter row. Let the row wrap or scroll instead.
+- Verify product listings, task listings, donation listings, forms, dashboards, filters, tables, and analytics screens at 360 px, 768 px, 1024 px, and 1440 px.
+
+### 4.8 Reusable text styles
+
+Create the following as reusable text styles in Figma and apply them consistently across all four CONFLUMIX modes. The same list becomes the source of truth for the frontend typography tokens.
+
+| Figma text style | Maps to |
+|---|---|
+| `Display / Neue Montreal` | Display |
+| `Heading / H1` – `Heading / H4` | H1–H4 |
+| `Body / Large`, `Body / Default`, `Body / Small` | Body styles |
+| `Label / Form`, `Label / Table Header`, `Label / Filter` | Label styles |
+| `Meta / Caption` | Caption / metadata |
+| `Action / Button`, `Action / Link` | Buttons and links |
+| `Data / Price`, `Data / Table Cell` | Price and data styles |
+
+Implementation guidance:
+
+- Define typography as CSS custom properties in the token layer (§24, §25) so components never hardcode sizes or weights.
+
+```css
+:root {
+  --font-family-primary: "Neue Montreal", "Helvetica Neue", Arial, sans-serif;
+
+  --text-display-size: 48px;
+  --text-display-line-height: 1.15;
+  --text-display-weight: 600;
+
+  --text-h1-size: 36px;
+  --text-h1-line-height: 1.2;
+  --text-h1-weight: 600;
+
+  --text-h2-size: 28px;
+  --text-h2-line-height: 1.25;
+  --text-h2-weight: 600;
+
+  --text-body-size: 17px;
+  --text-body-line-height: 1.6;
+  --text-body-weight: 400;
+
+  --text-meta-size: 13px;
+  --text-meta-line-height: 1.45;
+  --text-meta-weight: 400;
+
+  --text-button-size: 16px;
+  --text-button-line-height: 1.2;
+  --text-button-weight: 600;
+}
+```
+
+- In Tailwind, expose the family as `theme.extend.fontFamily.sans` and map the size/weight pairs to the same style names so class names and Figma styles stay in sync.
+- Do not introduce a competing typography token system. Keep one canonical set and reference it everywhere.
 
 ---
 
@@ -1594,7 +1804,7 @@ Example button styling:
 
 This is a reference example. Adapt selectors and component conventions to the repository rather than introducing a parallel styling architecture.
 
-> **Tailwind mapping note (for when `apps/web/` is scaffolded):** Expose the palette through `tailwind.config` `theme.extend.colors` using semantic names (`brand.primary`, `brand.accent`, `surface`, `border`, `text`, `success`, `warning`, `error`, `info`) or via CSS variables referenced by Tailwind. Configure `fontFamily.sans` to the chosen typeface, and `boxShadow`/`borderRadius` extensions to match the tokens in §6. Do not define colors in both a Tailwind theme and a separate parallel CSS system; choose one canonical source.
+> **Tailwind mapping note:** Expose the palette through `tailwind.config` `theme.extend.colors` using semantic names (`brand.primary`, `brand.accent`, `surface`, `border`, `text`, `success`, `warning`, `error`, `info`) or via CSS variables referenced by Tailwind. Configure `fontFamily.sans` to the Neue Montreal stack from §4, and `boxShadow`/`borderRadius` extensions to match the tokens in §6. Do not define colors in both a Tailwind theme and a separate parallel CSS system; choose one canonical source.
 
 ---
 
@@ -1634,6 +1844,9 @@ The following are prohibited unless a specific, justified requirement is approve
 - Large hover animations.
 - Continuous decorative animation.
 - Low-contrast gray text.
+- Introducing a second typeface alongside Neue Montreal.
+- Setting body text below 16 px or metadata below 13 px to fit more content.
+- Overly large hero typography, excessive uppercase text, or exaggerated letter spacing.
 - Hover-only actions.
 - Placeholder-only form labels.
 - Inconsistent button sizes.
@@ -1755,7 +1968,7 @@ The following real logo/icon assets exist at the repository root and should be t
 
 | ID | Question | Why it matters |
 |---|---|---|
-| UI-DEC-001 | Which typeface is final — Inter, or an existing institutional font? | Affects typography tokens and font loading. |
+| UI-DEC-001 | **Resolved:** the single typeface is **Neue Montreal** (§4). Remaining confirmation: delivery of licensed WOFF2 files for identical cross-platform rendering. | Affects font loading, licensing, and fallback rendering. |
 | UI-DEC-002 | Which icon library is approved (Lucide recommended)? | Prevents adding multiple icon libraries. |
 | UI-DEC-003 | Is a transparent-background logo asset available and approved? | Determines navbar/favicon asset choice. |
 | UI-DEC-004 | Are vectored (SVG) logo sources available? | Affects favicon quality and scalability. |
