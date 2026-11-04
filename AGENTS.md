@@ -70,8 +70,13 @@ scripts             Dev/maintenance scripts
 
 ## Commands
 
-No build, lint, or test tooling is configured yet (applications are not scaffolded). When tooling is added, record the exact commands here.
+Run these from `apps/web`:
+
+- `npm run typecheck`
+- `npm run lint`
+- `npm run build`
+- `npm run test:e2e` (requires the local development server on `127.0.0.1:3000` and installed Google Chrome)
 
 ## Current Status
 
-Initial documentation phase. Repository structure, PRD, and UI/UX brief exist. No application code, dependencies, or deployment configuration yet.
+The Next.js frontend is scaffolded and the New Product Marketplace prototype is implemented with browser-local development persistence. The ASP.NET API and analytics service are not scaffolded, so this is not production persistence or authorization.

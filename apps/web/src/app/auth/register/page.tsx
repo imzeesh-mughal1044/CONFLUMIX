@@ -6,7 +6,7 @@ import { useState, type FormEvent } from "react";
 import { AuthHeader, AuthShell } from "@/components/auth/auth-shell";
 import { Field, PasswordField, SubmitButton } from "@/components/auth/form-controls";
 import { StatusPanel } from "@/components/auth/status-panel";
-import { errorMessage, getAuthClient } from "@/lib/auth";
+import { authConfigured, errorMessage, getAuthClient, registerWithFrontendSession } from "@/lib/auth";
 import { validateEmail, validatePassword } from "@/lib/validation";
 
 export default function RegisterPage() {
@@ -29,6 +29,11 @@ export default function RegisterPage() {
     if (Object.values(nextErrors).some(Boolean)) return;
     setLoading(true);
     try {
+      if (!authConfigured) {
+        await registerWithFrontendSession(fullName, email, password);
+        router.replace(`/auth/login?registered=1&email=${encodeURIComponent(email)}`);
+        return;
+      }
       const redirectTo = `${window.location.origin}/auth/verify-email`;
       const { data: result, error } = await getAuthClient().auth.signUp({ email, password, options: { emailRedirectTo: redirectTo, data: { full_name: fullName, contact_number: String(data.get("phone") ?? "").trim() || null } } });
       if (error) throw error;

@@ -1976,6 +1976,27 @@ The following real logo/icon assets exist at the repository root and should be t
 | UI-DEC-006 | Confirm whether the orange accent button uses dark text (`#14201F`) as specified, or requires a darker accessible orange for white text. | Contrast compliance. |
 | UI-DEC-007 | Confirm canonical breakpoint scale (Tailwind defaults vs. custom). | Responsive consistency. |
 
+### 31. Buyer-first seller entry
+
+- A signed-in account is presented as `My account`, never as a Shop Manager by default.
+- The personal dashboard is the primary desktop location for `Become a Seller`; the mobile account drawer may expose the same contextual action without adding it to primary marketplace navigation.
+- `/become-a-seller` uses three accessible radio-card choices: New Products, Reuse, and Both. Cards use the existing teal surface system, visible keyboard focus, 44 px controls, and customer-facing language.
+- Incomplete New Product onboarding uses `Continue Seller Setup`; completed onboarding uses `Seller Center`. Reuse-only intent uses a distinct coming-soon state and never presents New Product management.
+- Intent, profile progress, and category completion must not be communicated as interchangeable states. Text accompanies selection and status color.
+
+### 32. Seller workspace navigation
+
+- New Product operational pages share a 270 px sticky desktop sidebar with store identity, grouped routes, active-page treatment, marketplace return, and marketplace expansion.
+- Below the desktop workspace breakpoint, the sidebar becomes a labelled drawer with a backdrop, Escape-independent close control, 44 px targets, and reduced-motion support.
+- Listing creation/editing remains a focused experience with a clear return path; public storefront and buyer pages do not inherit seller workspace navigation.
+- Category custom-attribute controls use visible labels, inline errors, explicit edit/remove actions, and confirmation before safe removal. Existing-listing references block removal rather than deleting historical values.
+
 ---
 
 *End of CONFLUMIX UI/UX Design System Brief.*
+# Shop Sections UX
+
+- Shop sections are seller-defined, flat storefront groups and must remain visually and conceptually distinct from marketplace categories.
+- The Seller Center exposes Shop Sections under Store. Management displays the current count out of 30, assigned and published product counts, accessible move-up/move-down ordering controls, rename, and confirmed safe deletion.
+- Listing creation and editing share one optional Shop Section selector. Sellers may create a section in a centered modal without losing listing state; the new section is selected automatically.
+- Storefronts show ordered, non-empty sections as horizontally scrollable 44-pixel-minimum controls. All Products includes assigned and unassigned eligible listings, while invalid or deleted section links fall back safely.

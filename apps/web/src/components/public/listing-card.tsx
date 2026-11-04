@@ -46,7 +46,7 @@ export function ListingDetail({ item, onClose }: { item: MarketplaceListing | nu
       <h2 id="detail-title">{item.title}</h2>
       <p className="detail-lead">{item.description}</p>
       <dl><div><dt>Locality</dt><dd>{item.locality}</dd></div><div><dt>Category</dt><dd>{item.category}</dd></div><div><dt>Status</dt><dd>{item.status}</dd></div><div><dt>Published</dt><dd>{new Date(`${item.createdAt}T00:00:00`).toLocaleDateString("en-PK", { dateStyle: "medium" })}</dd></div></dl>
-      <div className="detail-note"><Icon name="spark"/><p>This is frontend demonstration content. Mode-specific transactions and backend actions are not connected yet.</p></div>
+      <div className="detail-note"><Icon name="spark"/><p>Open the listing to review its details and available actions.</p></div>
       <a className="button button--primary" href={`/auth/required?next=${encodeURIComponent(window.location.pathname + window.location.search)}`}>Sign in to continue</a>
     </section>
   </div>;

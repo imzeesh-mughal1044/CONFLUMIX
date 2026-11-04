@@ -1,0 +1,10 @@
+import type { ListingFormData } from "./product-listing";
+import type { ProductCategory } from "./products";
+export type ImportField="title"|"sku"|"description"|"category"|"subcategory"|"price"|"quantity"|"brand"|"ignore";
+export type ColumnMapping=Record<string,ImportField>;
+export type ParsedSheet={filename:string;format:"csv"|"xlsx";size:number;headers:string[];rows:Record<string,string>[]};
+export type RowIssue={field:string;message:string};
+export type ImportRowResult={rowNumber:number;listing:ListingFormData;status:"valid"|"invalid"|"duplicate";issues:RowIssue[];source:Record<string,string>};
+export type ImportValidation={rows:ImportRowResult[];total:number;valid:number;invalid:number;duplicates:number;ready:number};
+export type ImportResult={batchId:string;createdIds:string[];skipped:number;failed:number;executedAt:string;status:"completed"|"partial"|"failed"};
+export type ExportFilters={status:"all"|"active"|"draft"|"deactivated"|"archived";category:"all"|ProductCategory|"Uncategorized";query:string};
