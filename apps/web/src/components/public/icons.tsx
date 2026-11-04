@@ -1,4 +1,4 @@
-type IconProps = { name: "search" | "pin" | "menu" | "close" | "arrow" | "user" | "shop" | "logout" | "chevron" | "heart" | "package" | "spark" | "plus"; size?: number };
+type IconProps = { name: "search" | "pin" | "menu" | "close" | "arrow" | "user" | "chevron" | "heart" | "package" | "spark"; size?: number };
 
 export function Icon({ name, size = 20 }: IconProps) {
   const paths = {
@@ -8,13 +8,10 @@ export function Icon({ name, size = 20 }: IconProps) {
     close: <><path d="m6 6 12 12M18 6 6 18"/></>,
     arrow: <><path d="M5 12h14M14 7l5 5-5 5"/></>,
     user: <><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></>,
-    shop: <><path d="M4 10v10h16V10M3 10l2-6h14l2 6M8 20v-6h8v6"/><path d="M3 10a3 3 0 0 0 5 2 3 3 0 0 0 4 0 3 3 0 0 0 4 0 3 3 0 0 0 5-2"/></>,
-    logout: <><path d="M10 5H5v14h5M14 8l4 4-4 4M8 12h10"/></>,
     chevron: <><path d="m9 18 6-6-6-6"/></>,
     heart: <><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8Z"/></>,
     package: <><path d="m12 3 8 4.5v9L12 21l-8-4.5v-9L12 3Z"/><path d="m4.5 7.8 7.5 4.3 7.5-4.3M12 12v9"/></>,
     spark: <><path d="m12 3 1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5L12 3ZM19 16l.7 2.3L22 19l-2.3.7L19 22l-.7-2.3L16 19l2.3-.7L19 16Z"/></>,
-    plus: <><path d="M12 5v14M5 12h14"/></>,
   };
   return <svg aria-hidden="true" viewBox="0 0 24 24" width={size} height={size} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">{paths[name]}</svg>;
 }

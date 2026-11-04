@@ -6,7 +6,7 @@ import { Suspense, useState, type FormEvent } from "react";
 import { AuthHeader, AuthShell } from "@/components/auth/auth-shell";
 import { Field, PasswordField, SubmitButton } from "@/components/auth/form-controls";
 import { StatusPanel } from "@/components/auth/status-panel";
-import { authConfigured, errorMessage, getAuthClient, safeReturnPath, signInWithFrontendSession } from "@/lib/auth";
+import { errorMessage, getAuthClient, safeReturnPath } from "@/lib/auth";
 import { validateEmail } from "@/lib/validation";
 
 function LoginContent() {
@@ -27,12 +27,8 @@ function LoginContent() {
     if (Object.values(nextErrors).some(Boolean)) return;
     setLoading(true);
     try {
-      if (authConfigured) {
-        const { error } = await getAuthClient().auth.signInWithPassword({ email, password });
-        if (error) throw new Error("We couldn't sign you in with those details. Check them and try again.");
-      } else {
-        await signInWithFrontendSession(email, password);
-      }
+      const { error } = await getAuthClient().auth.signInWithPassword({ email, password });
+      if (error) throw new Error("We couldn't sign you in with those details. Check them and try again.");
       router.replace(safeReturnPath(params.get("next")));
     } catch (error) {
       setFailure(errorMessage(error));
@@ -44,7 +40,7 @@ function LoginContent() {
   const next = safeReturnPath(params.get("next"), "");
   const nextQuery = next ? `?next=${encodeURIComponent(next)}` : "";
 
-  return <AuthShell brandTitle="Welcome back." brandCopy="Your local exchange network is waiting."><AuthHeader title="Sign in" description="Continue where you left off."/>{params.get("registered") === "1" && <StatusPanel tone="success" title="Account created">Sign in with the details you just registered.</StatusPanel>}{failure && <StatusPanel tone="error">{failure}</StatusPanel>}<form onSubmit={submit} noValidate><Field label="Email address" name="email" type="email" autoComplete="email" placeholder="you@example.com" defaultValue={params.get("email") ?? ""} error={errors.email}/><PasswordField label="Password" name="password" autoComplete="current-password" placeholder="Enter your password" error={errors.password}/><div className="form-row form-row--end"><Link href={`/auth/forgot-password${nextQuery}`}>Forgot password?</Link></div><SubmitButton loading={loading}>Sign in</SubmitButton></form><p className="auth-switch">New to CONFLUMIX? <Link href={`/auth/register${nextQuery}`}>Create an account</Link></p></AuthShell>;
+  return <AuthShell brandTitle="Welcome back." brandCopy="Your local exchange network is waiting."><AuthHeader title="Sign in" description="Continue where you left off."/>{failure && <StatusPanel tone="error">{failure}</StatusPanel>}<form onSubmit={submit} noValidate><Field label="Email address" name="email" type="email" autoComplete="email" placeholder="you@example.com" error={errors.email}/><PasswordField label="Password" name="password" autoComplete="current-password" placeholder="Enter your password" error={errors.password}/><div className="form-row form-row--end"><Link href={`/auth/forgot-password${nextQuery}`}>Forgot password?</Link></div><SubmitButton loading={loading}>Sign in</SubmitButton></form><p className="auth-switch">New to CONFLUMIX? <Link href={`/auth/register${nextQuery}`}>Create an account</Link></p></AuthShell>;
 }
 
 export default function LoginPage() {
