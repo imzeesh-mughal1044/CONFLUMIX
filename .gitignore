@@ -69,3 +69,7 @@ logs/
 tmp/
 temp/
 *~
+
+
+# TypeScript build cache
+*.tsbuildinfo

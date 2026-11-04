@@ -1102,6 +1102,7 @@ Response:
 ### 15.6 File and Image Metadata
 
 - `UploadedAsset` records (§12.2) reference storage objects; access rules centralized (§26).
+- The current NPM-04A frontend prototype has no protected upload service. CNIC number and CNIC front/back `File` objects therefore remain only in component memory and are discarded after local submission/navigation; they are never serialized to localStorage, public assets, listing payloads, query parameters, or public profile data. Only a non-sensitive local `identityDocumentsSubmitted` workflow flag may persist. This is a demonstration boundary, not secure identity storage or official verification.
 
 ### 15.7 Moderation and Administrative Controls
 
@@ -2352,3 +2353,59 @@ Empty documentation directories already exist as placeholders (**Existing**): `d
 ---
 
 *End of CONFLUMIX Technical Requirements Document (Version 1.0 — Draft for team confirmation and academic review).*
+### Local bulk-operation history and rollback boundary
+
+The frontend prototype records New Product bulk-operation history and field-level before/after values in browser-local storage. Rollback performs a compare-and-restore check only for the affected price, quantity, or listing-status field and records a separate linked rollback entry. This browser-only check does not provide transactional concurrency guarantees. A backend implementation must enforce seller ownership and an authoritative conditional update equivalent to “restore the previous value only when the current affected value still equals the original operation's recorded after-value.”
+
+### Local product import and export boundary
+
+NPM-12 parses CSV and XLSX files locally with SheetJS and never executes workbook macros or formulas. Imports are limited to 5 MB and 500 data rows, validate mapped listing fields through the shared manual-listing validator, enforce seller category configuration, and create only confirmed browser-local drafts. Raw files are not persisted. Exports generate CSV or XLSX files from seller-scoped managed listings and prefix formula-like cell values to reduce spreadsheet injection risk. Production integration must repeat authorization, validation, uniqueness, and file-safety checks at the backend boundary; the browser prototype is not an authoritative import transaction.
+
+### Local promotion model and pricing boundary
+
+NPM-13 stores seller-scoped promotion records with a stable ID, store ID, name, `percentage` or `fixed` discount, product IDs, categories, date-only start/end values, enabled flag, and timestamps. Start dates resolve to local 00:00 and end dates to local 23:59:59.999. Status is calculated at read time as disabled, scheduled, active, or expired.
+
+Applicability is the union of explicitly selected products and products in selected categories. Promotional PKR prices are calculated separately from the managed listing price and rounded to the nearest whole unit. A fixed discount must be lower than every eligible original price; percentage discounts are greater than zero and at most 100. No product record is rewritten to apply or remove a promotion.
+
+Conflict checking intersects resolved eligible product IDs and inclusive effective-date ranges for enabled, non-expired promotions. Any overlap blocks activation and prevents public application, so discounts never stack. The browser-local implementation is not transactionally authoritative. The ASP.NET Core backend must repeat seller/product authorization, validation, date and scope resolution, and conflict enforcement in one concurrency-safe transaction before production activation.
+
+### Local order model and lifecycle boundary
+
+NPM-14 uses a single browser-local order collection shared by the future demo-checkout creation boundary and seller list/detail pages. Each order contains seller/store and buyer references, timestamps, purchase-time item snapshots, recorded totals, current status, append-only status history, return-policy snapshot, demo payment state, optional cancellation data, and an optional return request. Seller reads require both the opaque order ID and current seller identity. This frontend check is not production authorization.
+
+Item snapshots preserve product ID, title, image, SKU, category, quantity, unit price, original promotional price and label where supplied, and subtotal. Historical totals are read from the record and are never recalculated from current listings or promotions. Multi-seller checkout is not implemented; each local order belongs to one seller/store and contains that seller's items only.
+
+The controlled status graph is Pending → Confirmed → Processing → Completed; Pending or Confirmed may be cancelled; Return Requested may become Return Approved or Return Rejected; Return Approved may become Returned. Updates use an expected-current-status comparison and append history rather than overwriting it. Cancellation records actor, time, optional reason, and `inventoryRestored: false` because no current checkout decrements stock. Seller return rejection requires a reason. Buyer return submission is intentionally absent because there is no authenticated buyer order surface.
+
+The local service exposes `createOrderFromCheckout` but the repository does not yet contain a checkout route or persistent cart. No order fixtures are seeded. Production ASP.NET Core integration must enforce authenticated buyer/seller ownership, item-level seller scope, transition concurrency, idempotency, totals, cancellation and return policies, and transactional inventory behavior. No real payment, refund, bank, courier, shipment, or delivery-confirmation integration exists.
+
+### Local return analytics and data-quality boundary
+
+NPM-15 derives return records only from seller-scoped NPM-14 orders with one stored return request. The structured taxonomy is Wrong Size, Compatibility Issue, Description Mismatch, Wrong Product, Damaged Product, Quality Issue, Missing Feature, Changed Mind, and Other. Runtime values outside that taxonomy are preserved as Unclassified with the original value retained for seller review; no automatic text classification occurs.
+
+Aggregations count unique request IDs, sum validated positive requested quantities, and attribute product/category evidence through immutable order-item snapshots. Reason percentages divide by categorized requests only; Unclassified records are reported separately. Date filters use the return request timestamp consistently. Product and category figures are raw counts and quantities, not rates. A valid return-rate cohort is not available because checkout and return-window instrumentation are incomplete.
+
+Trend display requires four requests across at least two calendar months. Seller observations require three distinct records matching one product and one structured investigative reason. This is a configurable display threshold for cautious raw observations, not statistical confidence or proof of fault. Public buyer warnings, automatic listing penalties, and predictive analysis are excluded.
+
+Filtered CSV export includes period, export time, return/order references, historical product snapshot, SKU, category, structured or Unclassified reason, quantity, status, and request timestamp. Buyer names, contacts, explanations, credentials, and verification data are excluded. Checkout-failure analytics remain unavailable because no eligible attempt/failure event source exists. Production authorization and aggregation must move to trusted ASP.NET Core/data-service boundaries before deployment.
+
+### Frontend seller-intent and onboarding boundary
+
+The frontend authentication fallback creates a buyer account and session only. Seller intent is a separate account-scoped record with the selected marketplace intent, a New Product start timestamp when applicable, and a separate Reuse interest timestamp when applicable. `both` records both intentions but does not merge seller profiles or mark either onboarding complete.
+
+New Product onboarding stage is derived from the existing profile and category eligibility data rather than stored as a second mutable completion flag. The next route is profile setup, category configuration, or the New Product Seller Center. Reuse onboarding has no profile, permissions, categories, listings, or dashboard in this implementation.
+
+Client route layouts check authentication, account-specific intent, and the supported New Product completion stage for Seller Center, management, and listing-authoring routes. These checks prevent accidental frontend navigation but are not production authorization. The ASP.NET Core API must enforce authenticated user ownership and marketplace-specific seller permissions on every seller operation. Browser-local records are keyed by normalized account email only as a prototype continuity mechanism; the production model must use immutable authenticated user IDs.
+
+### Seller workspace and custom-attribute boundary
+
+The shared seller sidebar is derived from implemented routes and rendered by the existing application shell only for New Product dashboard and Seller Center paths. Active state comes from the pathname; store identity and storefront URL come from the current account-scoped seller setup. Marketplace expansion reuses seller intent rather than modifying New Product profile data.
+
+Category custom attributes are stored as typed `AttributeDefinition` records per approved `ProductCategory`, while listing forms consume their names through the existing selected-field collection. Names are unique case-insensitively within a category. Choice fields require two or more unique options. Removal checks browser-local listings for an existing category/value reference and blocks destructive template removal when historical listing data depends on the field. Production APIs must repeat seller ownership, uniqueness, schema validation, and reference checks transactionally.
+# New Product Shop Sections
+
+The frontend prototype stores `ShopSection` records with `id`, `storeId`, `name`, `order`, `createdAt`, and `updatedAt`. A New Product listing may store one nullable `sectionId` plus its `storeId`. Section ownership is validated before local listing persistence.
+
+`shop-sections.ts` enforces a maximum of 30 records per store, required trimmed names, a 50-character maximum, and case-insensitive uniqueness within the store. Reordering persists explicit integer order. Deletion removes the section record and clears matching listing assignments without changing listing status or product content.
+
+The current implementation uses browser-local prototype persistence. These checks are not database constraints and will need transaction-safe API and PostgreSQL enforcement when the ASP.NET Core and Supabase persistence layers are implemented. New Product section records are marketplace-specific and must not be reused for Reuse stores.
