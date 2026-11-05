@@ -1,0 +1,520 @@
+import type { TaskAuthoringCategory, TaskAuthoringField } from "@/types/tasks";
+const f = (labels: string[]): TaskAuthoringField[] =>
+  labels.map((label, index) => ({
+    id: `field-${index}`,
+    label,
+    type: /Details|Description|Requirements|Questions|Behavior|Scope|Rules|Constraints|Objective|Changes|Sources|Guidelines|Already|Findings/.test(
+      label,
+    )
+      ? "textarea"
+      : /Required|Available|Confirmed|Needed/.test(label)
+        ? "boolean"
+        : "text",
+    required: index < 2,
+  }));
+const groups: Record<string, Array<[string, string, string[]]>> = {
+  "Software & Development": [
+    [
+      "web-development",
+      "Web Development",
+      [
+        "Website Type",
+        "Frontend / Backend / Full Stack",
+        "Programming Language or Framework",
+        "Number of Pages or Features",
+        "Existing Website URL",
+        "Hosting or Deployment Required",
+      ],
+    ],
+    [
+      "mobile-app-development",
+      "Mobile App Development",
+      [
+        "Platform",
+        "Development Framework",
+        "Feature Required",
+        "Existing App or New Feature",
+        "Device Compatibility",
+        "Testing or Deployment Required",
+      ],
+    ],
+    [
+      "software-development",
+      "Software Development",
+      [
+        "Software Type",
+        "Programming Language",
+        "Operating System",
+        "Feature or Module Required",
+        "Existing Codebase Available",
+        "Required Output Format",
+      ],
+    ],
+    [
+      "programming-coding",
+      "Programming & Coding",
+      [
+        "Programming Language",
+        "Problem Type",
+        "Input and Output Requirements",
+        "Required Algorithm",
+        "Code Constraints",
+        "Test Cases Available",
+      ],
+    ],
+    [
+      "bug-fixing",
+      "Bug Fixing & Debugging",
+      [
+        "Programming Language or Framework",
+        "Bug Type",
+        "Error Message",
+        "Steps to Reproduce",
+        "Relevant Code or Logs",
+        "Expected vs. Actual Behavior",
+      ],
+    ],
+    [
+      "ui-ux-design",
+      "UI/UX Design",
+      [
+        "Design Type",
+        "Platform or Device",
+        "Number of Screens",
+        "Design Tool Preference",
+        "Reference Designs",
+        "Prototype Required",
+      ],
+    ],
+    [
+      "database-management",
+      "Database Management",
+      [
+        "Database Type",
+        "Database Platform",
+        "Required Operation",
+        "Number of Tables or Records",
+        "Schema or Sample Data",
+        "Backup or Migration Required",
+      ],
+    ],
+    [
+      "api-integration",
+      "API Integration",
+      [
+        "API Type",
+        "API Documentation URL or File",
+        "Source and Target Systems",
+        "Authentication Method",
+        "Required Endpoints",
+        "Expected Response Format",
+      ],
+    ],
+    [
+      "website-testing",
+      "Website Testing & Quality Assurance",
+      [
+        "Testing Type",
+        "Website or Application URL",
+        "Browser or Device",
+        "Test Cases Required",
+        "Expected Test Coverage",
+        "Bug Report Format",
+      ],
+    ],
+    [
+      "technical-support",
+      "Technical Support & Troubleshooting",
+      [
+        "Issue Category",
+        "Device or Software",
+        "Operating System",
+        "Error Details",
+        "Troubleshooting Already Attempted",
+        "Desired Resolution",
+      ],
+    ],
+    [
+      "networking",
+      "Computer Networking Tasks",
+      [
+        "Task Type",
+        "Network Environment",
+        "Operating System or Network Tool",
+        "Problem Description",
+        "Relevant Logs or Configuration",
+        "Expected Outcome",
+      ],
+    ],
+    [
+      "cybersecurity",
+      "Cybersecurity Consultation",
+      [
+        "Security Task Type",
+        "System or Application Type",
+        "Authorized Scope",
+        "Security Standard or Requirements",
+        "Assessment Deliverable",
+        "Testing Permission Confirmed",
+      ],
+    ],
+  ],
+  "Design & Multimedia": [
+    [
+      "graphic-design",
+      "Graphic Design",
+      [
+        "Design Type",
+        "Dimensions",
+        "Preferred Style",
+        "Brand Colors",
+        "Reference Images",
+        "Output Format",
+      ],
+    ],
+    [
+      "logo-branding",
+      "Logo & Branding Design",
+      [
+        "Brand Name",
+        "Industry or Business Type",
+        "Logo Style",
+        "Preferred Colors",
+        "Tagline",
+        "Required File Formats",
+      ],
+    ],
+    [
+      "video-editing",
+      "Video Editing",
+      [
+        "Video Duration",
+        "Raw Footage Duration",
+        "Editing Style",
+        "Aspect Ratio",
+        "Captions or Subtitles Required",
+        "Output Resolution",
+      ],
+    ],
+    [
+      "photo-editing",
+      "Photo Editing",
+      [
+        "Number of Images",
+        "Editing Type",
+        "Image Format",
+        "Required Dimensions",
+        "Background Changes Required",
+        "Output Format",
+      ],
+    ],
+    [
+      "3d-modeling",
+      "3D Modeling & Rendering",
+      [
+        "Model Type",
+        "Object Complexity",
+        "Reference Images or Drawings",
+        "Required Software",
+        "Texture Requirements",
+        "Output Format",
+      ],
+    ],
+    [
+      "animation",
+      "Animation & Motion Graphics",
+      [
+        "Animation Type",
+        "Duration",
+        "Animation Style",
+        "Frame Rate",
+        "Script or Storyboard Available",
+        "Output Format",
+      ],
+    ],
+    [
+      "audio-editing",
+      "Audio Editing & Sound Design",
+      [
+        "Audio Type",
+        "Source File Format",
+        "Audio Duration",
+        "Editing Requirements",
+        "Noise Reduction Required",
+        "Output Format",
+      ],
+    ],
+    [
+      "presentation-design",
+      "Presentation & PowerPoint Design",
+      [
+        "Presentation Topic",
+        "Number of Slides",
+        "Target Audience",
+        "Existing Content Available",
+        "Design Theme",
+        "Output Format",
+      ],
+    ],
+  ],
+  "Writing, Language & Documents": [
+    [
+      "content-writing",
+      "Content Writing",
+      [
+        "Content Type",
+        "Topic",
+        "Word Count",
+        "Target Audience",
+        "Writing Tone",
+        "Reference Sources",
+      ],
+    ],
+    [
+      "copywriting",
+      "Copywriting",
+      [
+        "Copy Type",
+        "Product or Service",
+        "Target Audience",
+        "Marketing Goal",
+        "Brand Voice",
+        "Call to Action",
+      ],
+    ],
+    [
+      "proofreading",
+      "Proofreading & Editing",
+      [
+        "Document Type",
+        "Word Count",
+        "Editing Level",
+        "Language",
+        "Style Guide",
+        "Track Changes Required",
+      ],
+    ],
+    [
+      "translation",
+      "Translation & Transcription",
+      [
+        "Task Type",
+        "Source Language",
+        "Target Language",
+        "Word Count or Audio Duration",
+        "Source File Format",
+        "Required Output Format",
+      ],
+    ],
+    [
+      "document-formatting",
+      "Document Formatting",
+      [
+        "Document Type",
+        "Page Count",
+        "Required Layout",
+        "Formatting Guidelines",
+        "Tables or Figures Required",
+        "Output Format",
+      ],
+    ],
+    [
+      "research",
+      "Research & Information Gathering",
+      [
+        "Research Topic",
+        "Research Questions",
+        "Required Sources",
+        "Geographic or Time Scope",
+        "Number of Sources",
+        "Citation Style",
+      ],
+    ],
+  ],
+  "Data & Analytics": [
+    [
+      "data-entry",
+      "Data Entry",
+      [
+        "Data Type",
+        "Number of Records",
+        "Source Format",
+        "Destination Format",
+        "Required Fields",
+        "Validation Rules",
+      ],
+    ],
+    [
+      "data-analysis",
+      "Data Analysis",
+      [
+        "Dataset Format",
+        "Dataset Size",
+        "Analysis Objective",
+        "Variables of Interest",
+        "Statistical Methods Required",
+        "Expected Findings or Report",
+      ],
+    ],
+    [
+      "data-visualization",
+      "Data Visualization",
+      [
+        "Dataset Format",
+        "Chart Type",
+        "Variables to Visualize",
+        "Number of Visualizations",
+        "Visualization Tool",
+        "Export Format",
+      ],
+    ],
+    [
+      "spreadsheet",
+      "Excel & Spreadsheet Tasks",
+      [
+        "Software",
+        "Task Type",
+        "Number of Sheets",
+        "Formula or Function Required",
+        "Pivot Tables or Charts Required",
+        "Output Format",
+      ],
+    ],
+    [
+      "data-cleaning",
+      "Data Cleaning",
+      [
+        "Dataset Format",
+        "Number of Rows and Columns",
+        "Missing Values",
+        "Duplicate Records",
+        "Data Quality Issues",
+        "Cleaned Output Format",
+      ],
+    ],
+    [
+      "machine-learning",
+      "Machine Learning & AI Tasks",
+      [
+        "Task Type",
+        "Dataset Availability",
+        "Dataset Size",
+        "Programming Language or Framework",
+        "Model or Method Required",
+        "Evaluation Metrics",
+      ],
+    ],
+  ],
+  "Marketing & Online Business": [
+    [
+      "digital-marketing",
+      "Digital Marketing",
+      [
+        "Marketing Channel",
+        "Campaign Objective",
+        "Target Audience",
+        "Campaign Duration",
+        "Budget for Advertising",
+        "Success Metrics",
+      ],
+    ],
+    [
+      "social-media",
+      "Social Media Management",
+      [
+        "Social Media Platform",
+        "Number of Posts",
+        "Content Type",
+        "Posting Schedule",
+        "Brand Guidelines",
+        "Engagement or Reporting Requirements",
+      ],
+    ],
+    [
+      "seo",
+      "SEO (Search Engine Optimization)",
+      [
+        "SEO Type",
+        "Website URL",
+        "Target Keywords",
+        "Target Location or Market",
+        "Number of Pages",
+        "SEO Report Required",
+      ],
+    ],
+    [
+      "ecommerce",
+      "E-commerce Support",
+      [
+        "E-commerce Platform",
+        "Task Type",
+        "Number of Products",
+        "Product Data Availability",
+        "Inventory or Catalog Changes",
+        "Expected Output",
+      ],
+    ],
+    [
+      "wordpress",
+      "WordPress & CMS Management",
+      [
+        "CMS Platform",
+        "Website URL",
+        "Required Changes",
+        "Theme or Plugin Details",
+        "Number of Pages",
+        "Backup Required",
+      ],
+    ],
+  ],
+  "Administrative & Educational Tasks": [
+    [
+      "virtual-assistance",
+      "Virtual Assistance",
+      [
+        "Assistance Type",
+        "Number of Tasks",
+        "Required Tools",
+        "Working Hours or Availability",
+        "Deadline or Schedule",
+        "Expected Output",
+      ],
+    ],
+    [
+      "email-calendar",
+      "Email & Calendar Management",
+      [
+        "Email or Calendar Platform",
+        "Task Type",
+        "Number of Emails or Events",
+        "Scheduling Requirements",
+        "Time Zone",
+        "Recurrence Rules",
+      ],
+    ],
+    [
+      "academic-support",
+      "Academic & Educational Support",
+      [
+        "Subject",
+        "Topic",
+        "Support Type",
+        "Academic Level",
+        "Session Duration or Word Count",
+        "Required Learning Materials",
+      ],
+    ],
+  ],
+};
+export const taskAuthoringCategories: TaskAuthoringCategory[] = Object.entries(
+  groups,
+).flatMap(([group, items]) =>
+  items.map(([id, label, labels]) => ({ id, label, group, fields: f(labels) })),
+);
+export const customTaskCategory: TaskAuthoringCategory = {
+  id: "custom",
+  label: "Other / Custom Task",
+  group: "Other",
+  fields: f(["Relevant attributes and details", "Expected output format"]),
+};
+export const taskAuthoringGroups = Object.keys(groups);
