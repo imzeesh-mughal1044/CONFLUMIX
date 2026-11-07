@@ -1,4 +1,4 @@
-type IconProps = { name: "search" | "pin" | "menu" | "close" | "arrow" | "user" | "chevron" | "heart" | "package" | "spark"; size?: number };
+type IconProps = { name: "search" | "pin" | "menu" | "close" | "arrow" | "user" | "chevron" | "heart" | "package" | "spark" | "plus" | "shop"; size?: number };
 
 export function Icon({ name, size = 20 }: IconProps) {
   const paths = {
@@ -12,6 +12,8 @@ export function Icon({ name, size = 20 }: IconProps) {
     heart: <><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8Z"/></>,
     package: <><path d="m12 3 8 4.5v9L12 21l-8-4.5v-9L12 3Z"/><path d="m4.5 7.8 7.5 4.3 7.5-4.3M12 12v9"/></>,
     spark: <><path d="m12 3 1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5L12 3ZM19 16l.7 2.3L22 19l-2.3.7L19 22l-.7-2.3L16 19l2.3-.7L19 16Z"/></>,
+    plus: <path d="M12 5v14M5 12h14"/>,
+    shop: <><path d="M4 10v10h16V10M3 10l2-6h14l2 6"/><path d="M8 20v-6h8v6M3 10c0 2 3 2 4.5 0 1.5 2 3.5 2 4.5 0 1 2 3 2 4.5 0 1.5 2 4.5 2 4.5 0"/></>,
   };
   return <svg aria-hidden="true" viewBox="0 0 24 24" width={size} height={size} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">{paths[name]}</svg>;
 }
