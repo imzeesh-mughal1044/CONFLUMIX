@@ -10,7 +10,7 @@ import { Icon } from "./icons";
 import { SearchBar } from "./search-bar";
 
 const nav = [
-  ["Marketplace", "/marketplace"], ["New Products", "/new-products"], ["Reuse", "/marketplace?mode=reuse"], ["Tasks", "/tasks"], ["Donations", "/marketplace?mode=donations"],
+  ["Marketplace", "/marketplace"], ["New Products", "/new-products"], ["Reuse", "/reuse"], ["Tasks", "/tasks"], ["Donations", "/marketplace?mode=donations"],
 ] as const;
 
 export function PublicShell({ children }: { children: React.ReactNode }) {
@@ -32,7 +32,7 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
       <div className="public-header__inner">
         <Link href="/" className="public-logo" aria-label="CONFLUMIX home"><Image src="/CONFLUMIX_nav.png" alt="CONFLUMIX" width={990} height={185} priority sizes="(max-width: 767px) 154px, 190px"/></Link>
         <nav className="desktop-nav" aria-label="Primary navigation">
-          {nav.map(([label, href]) => <Link key={label} href={href} className={(label === "Marketplace" && pathname === "/marketplace") || (label === "New Products" && pathname.startsWith("/new-products")) || (label === "Tasks" && pathname.startsWith("/tasks")) ? "is-active" : ""}>{label}</Link>)}
+          {nav.map(([label, href]) => <Link key={label} href={href} className={(label === "Marketplace" && pathname === "/marketplace") || (label === "New Products" && pathname.startsWith("/new-products")) || (label === "Reuse" && pathname.startsWith("/reuse")) || (label === "Tasks" && pathname.startsWith("/tasks")) ? "is-active" : ""}>{label}</Link>)}
         </nav>
         <div className="header-actions">
           <button className="icon-action search-toggle" type="button" aria-label="Open search" aria-expanded={searchOpen} onClick={() => setSearchOpen((open) => !open)}><Icon name="search"/></button>
