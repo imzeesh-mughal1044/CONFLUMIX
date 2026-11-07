@@ -93,6 +93,7 @@ export function ManageReuseListings() {
         <nav className="reuse-dashboard-nav" aria-label="Reuse Seller Center">
           <Link href="/dashboard/reuse">Overview</Link>
           <Link className="is-active" href="/dashboard/reuse/listings" aria-current="page">Listings</Link>
+          <Link href="/dashboard/reuse/analytics">Analytics</Link>
           <Link href="/reuse/sell/new">Create listing</Link>
           <Link href="/dashboard/seller-center/reuse/categories">Categories</Link>
         </nav>

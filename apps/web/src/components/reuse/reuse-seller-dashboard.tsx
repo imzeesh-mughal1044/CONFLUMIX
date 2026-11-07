@@ -128,6 +128,7 @@ function DashboardContent({ state }: { state: Extract<DashboardState, { kind: "r
         <nav className="reuse-dashboard-nav" aria-label="Reuse Seller Center">
           <Link className="is-active" href="/dashboard/reuse" aria-current="page">Overview</Link>
           <Link href="/dashboard/reuse/listings">Listings</Link>
+          <Link href="/dashboard/reuse/analytics">Analytics</Link>
           <Link href="/reuse/sell/new">Create listing</Link>
           <Link href="/dashboard/seller-center/reuse/categories">Categories</Link>
         </nav>
@@ -183,7 +184,7 @@ function DashboardContent({ state }: { state: Extract<DashboardState, { kind: "r
               {summary.pendingOffers ? <p className="dashboard-empty"><strong>{summary.pendingOffers}</strong> pending offer{summary.pendingOffers === 1 ? "" : "s"} recorded for this seller. A seller-wide offer-management route is not implemented; open an offer from its existing private status link.</p> : <Empty text="No pending seller offers are recorded in this browser." />}
             </Panel>
             <Panel kicker="Transactions" title="Reservations and handovers"><Empty text="No authoritative Reuse reservation, completed transaction, schedule, or handover activity is available." /></Panel>
-            <Panel kicker="Analytics" title="Reuse performance"><Empty text="RUS-12 and its metric definitions are not implemented. Turnover, demand, conversion, and revenue are not estimated here." /></Panel>
+            <Panel kicker="Analytics" title="Reuse performance" action={<Link href="/dashboard/reuse/analytics">View evidence</Link>}><Empty text="Transaction-dependent and undefined metrics remain unavailable. The analytics page shows traceable listing and asking-price evidence only." /></Panel>
             <Panel kicker="Activity" title="Event history"><Empty text="There is no Reuse activity-event service. Listing records above use their stored timestamps; no sale or handover events are fabricated." /></Panel>
           </aside>
         </div>
