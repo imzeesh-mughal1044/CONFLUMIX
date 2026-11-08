@@ -286,6 +286,30 @@ This concludes the structural specification for the CONFLUMIX repository.
 - Fictional handover fixtures are excluded from completed-impact analytics. Response times, contributed value, material diversion, and carbon impact remain unavailable because reliable relationships, valuation fields, compatible weights, and approved methodologies do not exist.
 - DS-04 and DS-05 extend the shared `mode-insights.ts` processing layer and `insight-ui.tsx` navigation/chart components. No API endpoint, database integration, Python analytics module, export contract, or operational workflow was added.
 
+## Group 53 — Administrative Capability Boundary
+
+- `/admin` and `/admin/verifications` provide non-indexed capability-boundary pages for ADM-01 and ADM-02. They expose no operational, applicant, document, marketplace, or decision data and provide no administrative mutation controls.
+- Operational administration is intentionally blocked because the current authentication model contains no server-validated administrator or reviewer role. Frontend sessions contain only browser-local email and display-name values, which are not an authorization source.
+- The existing applicant-facing `/account/verification` remains backed by a single browser-local seller setup record. There is no shared verification-submission queue, organization-review model, secure evidence storage, reviewer assignment, server decision service, audit log, or authorized review notification integration.
+- Pending verification, listing moderation, reported-issue, and administrative-activity metrics are unavailable because their required case stores do not exist. No active listing is misclassified as awaiting review and no history is fabricated.
+- Making ADM-01 or ADM-02 operational requires server-side role enforcement, a shared submission schema, validated status transitions, secure evidence access where applicable, audit retention, and committed-decision notifications. Local storage, hidden navigation, hardcoded identities, and client-only guards are explicitly rejected as security controls.
+
+## Group 54 — Listing Moderation Capability Boundary
+
+- `/admin/listings` provides ADM-03 as a non-indexed, blocked administrative capability surface. It exposes no listings, owners, images, queue metrics, moderation decisions, or administrative actions.
+- Existing New Product, Reuse, Task, and Donation status fields describe publication, inventory, offer, task, or resource workflows; none establishes a moderation submission, reviewer assignment, decision status, or resubmission event. Active or published records are not reclassified as awaiting review.
+- Approval, rejection, change requests, review history, owner notifications, and concurrent decision handling are unavailable because no server-authorized reviewer role, moderation case store, mode-aware transition service, audit log, or versioned decision endpoint exists.
+- Public listing pages and owner editing workflows remain unchanged. ADM-03 does not create a parallel lifecycle, listing editor, local-storage moderation queue, hardcoded administrator, or simulated decision history.
+- Operational moderation requires server-side record-level permissions, explicit per-mode review eligibility, preserved submission snapshots, validated transitions, optimistic concurrency or transactions, owner correction and resubmission integration, audit retention, and post-commit notifications.
+
+## Group 55 — Reports and Administrative Activity Boundaries
+
+- `/admin/reports` provides ADM-04 as a non-indexed blocked capability surface. No user report form, report record, supported category, target relationship, reporter privacy policy, evidence store, review status, or resolution service exists, so no queue or moderation action is presented.
+- Marketplace inactivity, listing removal, order cancellation, task revision, and donation workflow states are not interpreted as reports. Reporter identities, descriptions, evidence, review notes, related records, and histories are neither exposed nor fabricated.
+- `/admin/activity` provides ADM-05 as a separate non-indexed blocked capability surface. Personal activity, notifications, order histories, offers, task workrooms, and donation histories remain operational user records and are not represented as administrative audit events.
+- No server-validated administrator actor, append-only audit schema, before-and-after state, reason field, integrity protection, retention policy, restricted export, or administrative event source exists. Consequently no activity rows, actors, timestamps, or exports are shown.
+- Operational ADM-04 and ADM-05 require server-side roles and record-level permissions, report submission and privacy policy, validated report transitions, concurrency control, post-commit notifications, authenticated audit emission, immutable storage, and approved retention and export policies.
+
 ## Group 45 — Shared Orders, Transactions, and Reviews
 
 - `/account/orders` provides an authenticated overview of attributable New Product orders, Reuse offers, and task workrooms while retaining each workflow's real status, role, history, and valid routes.
