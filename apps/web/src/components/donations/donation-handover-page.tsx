@@ -1,0 +1,73 @@
+"use client";
+
+import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
+import { PublicShell } from "@/components/public/public-shell";
+import { donationClaimDemonstrations } from "@/data/donation-claims";
+import { readAuthSession, type AuthSession } from "@/lib/auth";
+import { donationCategoryLabel, findDonationResource } from "@/services/donations";
+import type { DonationHandover, DonationHandoverStage } from "@/types/donations";
+
+type HandoverAction = "propose" | "confirm-time" | "ready" | "complete" | "issue";
+const dateTimeFormat=new Intl.DateTimeFormat("en-PK",{day:"numeric",month:"short",year:"numeric",hour:"numeric",minute:"2-digit",timeZone:"Asia/Karachi",timeZoneName:"short"});
+const statusContent:Record<DonationHandoverStage,{label:string;description:string;next:string}>={
+  "pending-scheduling":{label:"Pending scheduling",description:"No handover time has been proposed or confirmed.",next:"An authorized participant must propose a suitable time."},
+  "time-proposed":{label:"Time proposed",description:"A time proposal exists but is not an agreed appointment.",next:"The appropriate participant must confirm or revise the proposal."},
+  "time-confirmed":{label:"Time confirmed",description:"The demonstration record contains an agreed schedule.",next:"The donor must prepare the resource before readiness can be recorded."},
+  ready:{label:"Ready for handover",description:"The resource is recorded as ready; transfer is not complete.",next:"Eligible participants must complete the approved confirmation process."},
+  "awaiting-confirmation":{label:"Awaiting confirmation",description:"The transfer still requires participant and backend confirmation.",next:"Complete only after every approved confirmation requirement is satisfied."},
+  completed:{label:"Completed handover",description:"This fictional record demonstrates a completed lifecycle state.",next:"No repeated completion action is permitted."},
+  "issue-reported":{label:"Issue reported",description:"An issue is recorded and ordinary progression is paused.",next:"Resolution requires a supported coordination workflow."},
+};
+
+export function DonationHandoverPage({handover}:{handover:DonationHandover}){
+  const router=useRouter();
+  const dialog=useRef<HTMLDialogElement>(null);
+  const historyRef=useRef<HTMLElement>(null);
+  const [session,setSession]=useState<AuthSession|null|undefined>();
+  const [action,setAction]=useState<HandoverAction|null>(null);
+  const [schedule,setSchedule]=useState("");
+  const [issueCategory,setIssueCategory]=useState("");
+  const [issueDescription,setIssueDescription]=useState("");
+  const [notice,setNotice]=useState("");
+  const resource=findDonationResource(handover.resourceId);
+  const claim=donationClaimDemonstrations.find(item=>item.id===handover.claimId);
+  const status=statusContent[handover.status];
+
+  useEffect(()=>{let active=true;void readAuthSession().then(current=>{if(!active)return;if(!current){router.replace(`/auth/login?next=${encodeURIComponent(`/dashboard/donations/handover/${handover.id}`)}`);return}setSession(current)});return()=>{active=false}},[handover.id,router]);
+  const openAction=(value:HandoverAction)=>{setAction(value);setNotice("");setSchedule("");setIssueCategory("");setIssueDescription("");dialog.current?.showModal()};
+  const confirmAction=()=>{
+    if(!action)return;
+    if(action==="propose"&&!schedule){setNotice("Choose a proposed date and time.");return}
+    if(action==="propose"&&new Date(schedule).getTime()<=Date.now()){setNotice("Choose a future date and time.");return}
+    if(action==="issue"&&!issueCategory){setNotice("Choose an issue category.");return}
+    if(action==="issue"&&issueDescription.trim().length<20){setNotice("Describe the issue in at least 20 characters without including sensitive contact details.");return}
+    setNotice("This action cannot be persisted because participant authorization and the handover backend are not connected. The schedule, readiness, completion, issue status, inventory, and activity history remain unchanged.");
+  };
+  const viewHistory=()=>{historyRef.current?.scrollIntoView({behavior:"smooth",block:"start"});historyRef.current?.focus()};
+
+  if(!session)return <PublicShell><div className="donation-admin-loading page-container" role="status">Loading protected handover workspace…</div></PublicShell>;
+  if(!resource||!claim)return <PublicShell><div className="donation-handover-state page-container"><h1>Handover details are unavailable</h1><p>The related resource or claim cannot be resolved safely.</p><Link className="button button--primary" href="/dashboard/donations/claims">Return to claims</Link></div></PublicShell>;
+
+  return <PublicShell><article className="donation-handover"><div className="page-container">
+    <nav className="donation-handover__breadcrumb" aria-label="Breadcrumb"><Link href="/dashboard">Dashboard</Link><span>/</span><Link href="/dashboard/donations/claims">Donation claims</Link><span>/</span><span aria-current="page">{handover.id}</span></nav>
+    <header className="donation-handover__header"><div><p className="section-kicker">DON-10 · Demonstration handover</p><h1>Donation handover</h1><p>Coordinate an agreed transfer without confusing scheduling, readiness, or confirmation with completed delivery.</p></div><Link className="button button--secondary" href="/dashboard/donations/claims">Back to claims</Link></header>
+    <div className="donation-handover__boundary"><strong>Fictional operational record</strong><p>This handover contains no real participant data, appointment, delivery, verification, or support case. The current account has no donor, receiver, or coordinator role assignment.</p></div>
+    <div className="donation-handover__layout"><div className="donation-handover__main">
+      <section className="donation-handover__resource"><div className="donation-handover__image"><Image src={resource.image} alt={`${resource.title} resource`} fill priority sizes="(max-width: 760px) 100vw, 320px"/></div><div><p className="section-kicker">Resource and quantity</p><h2>{resource.title}</h2><p>{handover.quantity} {resource.unit} recorded for this handover</p><dl><div><dt>Resource reference</dt><dd>{resource.id}</dd></div><div><dt>Claim reference</dt><dd>{handover.claimId}</dd></div><div><dt>Reservation reference</dt><dd>{handover.reservationReference}</dd></div><div><dt>Category</dt><dd>{donationCategoryLabel(resource.category)}</dd></div><div><dt>Condition</dt><dd>{resource.condition}</dd></div></dl><Link href={`/donations/resources/${resource.id}`}>View public resource details</Link></div></section>
+      <section className="donation-handover__panel"><p className="section-kicker">Participants</p><h2>Donor and receiver references</h2><div className="donation-handover__people"><article><span>Donor</span><strong>{handover.donorName}</strong><p>{handover.donorType} · Public demonstration identity</p></article><article><span>Receiver</span><strong>{handover.receiverName}</strong><p>{handover.receiverType} · Related claim {claim.id}</p></article></div><p className="donation-handover__privacy">Public profiles are not implemented. Private addresses, phone numbers, email addresses, and verification records are not displayed.</p></section>
+      <section className="donation-handover__panel"><p className="section-kicker">Agreed arrangement</p><h2>Pickup and handover details</h2><dl className="donation-handover__facts"><div><dt>Method</dt><dd>{handover.method}</dd></div><div><dt>General locality</dt><dd>{handover.locality}</dd></div><div><dt>Location visibility</dt><dd>{handover.locationGuidance}</dd></div><div><dt>Availability window</dt><dd>{handover.availabilityWindow}</dd></div></dl></section>
+      <section className="donation-handover__panel"><p className="section-kicker">Schedule</p><h2>Proposed and confirmed time</h2><div className="donation-handover__schedule"><div><span>Proposed time</span><strong>{handover.proposedSchedule?dateTimeFormat.format(new Date(handover.proposedSchedule)):"No proposal recorded"}</strong><small>{handover.proposedSchedule?"Proposal only until confirmed":"No default appointment is assumed"}</small></div><div><span>Confirmed time</span><strong>{handover.confirmedSchedule?dateTimeFormat.format(new Date(handover.confirmedSchedule)):"Not confirmed"}</strong><small>{handover.timezone}</small></div></div></section>
+      <section className="donation-handover__panel"><p className="section-kicker">Preparation</p><h2>Handover instructions</h2><p className="donation-handover__instructions">{handover.instructions||"No additional instructions were recorded."}</p></section>
+      <section className="donation-handover__panel donation-handover__verification"><p className="section-kicker">Transfer confirmation</p><h2>Digital code or QR</h2><strong>Secure confirmation is unavailable</strong><p>DEC-013 remains unresolved and the repository has no token service, QR component, expiry rules, or backend validator. No code or QR is generated, displayed, or compared in the browser.</p></section>
+      <section className="donation-handover__history" ref={historyRef} tabIndex={-1} aria-labelledby="handover-history-title"><p className="section-kicker">Recorded activity</p><h2 id="handover-history-title">Handover history</h2>{handover.activity.length?<ol>{handover.activity.map(item=><li key={`${item.label}-${item.at}`}><time dateTime={item.at}>{dateTimeFormat.format(new Date(item.at))}</time><div><strong>{item.label}</strong><span>{item.actor} · {statusContent[item.status].label}</span><p>{item.detail}</p></div></li>)}</ol>:<p>No activity history is available for this record.</p>}<small>This is fictional demonstration history, not a persistent audit log.</small></section>
+    </div><aside className="donation-handover__side"><section className="donation-handover__status"><span>Current handover status</span><h2>{status.label}</h2><p>{status.description}</p><strong>Next action</strong><p>{status.next}</p></section><section className="donation-handover__lifecycle"><h2>Related lifecycle</h2><dl><div><dt>Claim</dt><dd>{claim.claimStatus}</dd></div><div><dt>Reservation</dt><dd>{claim.reservationStatus}</dd></div><div><dt>Schedule</dt><dd>{handover.confirmedSchedule?"Confirmed":handover.proposedSchedule?"Proposed":"Not scheduled"}</dd></div><div><dt>Readiness</dt><dd>{["ready","awaiting-confirmation","completed"].includes(handover.status)?"Recorded":"Not recorded"}</dd></div><div><dt>Completion</dt><dd>{handover.status==="completed"?`Example at ${dateTimeFormat.format(new Date(handover.completedAt!))}`:"Not completed"}</dd></div><div><dt>Issue</dt><dd>{handover.issueSummary??"None recorded"}</dd></div></dl></section><section className="donation-handover__actions"><h2>Available actions</h2>{handover.status==="pending-scheduling"&&<button className="button button--primary" type="button" onClick={()=>openAction("propose")}>Propose handover time</button>}{handover.status==="time-proposed"&&<button className="button button--primary" type="button" onClick={()=>openAction("confirm-time")}>Confirm proposed time</button>}{handover.status==="time-confirmed"&&<button className="button button--primary" type="button" onClick={()=>openAction("ready")}>Mark ready for handover</button>}{["ready","awaiting-confirmation"].includes(handover.status)&&<button className="button button--primary" type="button" onClick={()=>openAction("complete")}>Confirm handover</button>}{handover.status!=="completed"&&<button className="button button--secondary" type="button" onClick={()=>openAction("issue")}>Report an issue</button>}<button className="button button--quiet" type="button" onClick={viewHistory}>View history</button>{handover.status==="completed"&&<p>No repeated completion or ordinary lifecycle action is available.</p>}{handover.status==="issue-reported"&&<p>Ordinary progression is paused while the recorded issue remains unresolved.</p>}</section></aside></div>
+  </div></article>
+  <dialog ref={dialog} className="donation-handover__dialog" onClose={()=>{setAction(null);setNotice("")}}>{action&&<><p className="section-kicker">Demonstration action</p><h2>{actionTitle(action)}</h2><p>{actionExplanation(action,handover)}</p>{action==="propose"&&<label><span>Proposed date and time *</span><input type="datetime-local" value={schedule} onChange={event=>setSchedule(event.target.value)}/><small>The proposal remains unconfirmed until an authorized participant accepts it.</small></label>}{action==="issue"&&<><label><span>Issue category *</span><select value={issueCategory} onChange={event=>setIssueCategory(event.target.value)}><option value="">Select a category</option><option>Resource condition mismatch</option><option>Pickup difficulty</option><option>Scheduling conflict</option><option>Missing quantity</option><option>Confirmation problem</option><option>Other supported issue</option></select></label><label><span>Description *</span><textarea rows={4} value={issueDescription} onChange={event=>setIssueDescription(event.target.value)}/><small>Do not include private contact details or exact residential addresses.</small></label></>}{notice&&<div className="donation-admin__action-notice" role="alert">{notice}</div>}<div><button className="button button--secondary" type="button" onClick={()=>dialog.current?.close()}>Cancel</button><button className="button button--primary" type="button" onClick={confirmAction}>Continue</button></div></>}</dialog>
+  </PublicShell>;
+}
+
+function actionTitle(action:HandoverAction){return action==="propose"?"Propose a handover time":action==="confirm-time"?"Confirm the proposed time?":action==="ready"?"Mark the resource ready?":action==="complete"?"Confirm this handover?":"Report a handover issue"}
+function actionExplanation(action:HandoverAction,handover:DonationHandover){if(action==="propose")return "Choose a future local time. Creating a proposal would not create a confirmed appointment.";if(action==="confirm-time")return `This would confirm the recorded proposal for ${handover.proposedSchedule?dateTimeFormat.format(new Date(handover.proposedSchedule)):"an unavailable time"}. It would not mark delivery complete.`;if(action==="ready")return "Readiness means the resource is prepared for the arranged transfer. It does not confirm delivery.";if(action==="complete")return `Completion would concern ${handover.quantity} allocated units and require authorized participant and backend confirmation. No digital verification method is implemented.`;return "Reporting an issue would preserve the current handover context and would not automatically cancel or complete it."}

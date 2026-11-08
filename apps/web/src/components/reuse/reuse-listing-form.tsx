@@ -362,10 +362,15 @@ export function ReuseListingForm({
       handoverMethods: data.handoverMethods,
       repairHistory: data.repairs,
       priceHistory:
-        original?.priceHistory ??
-        (price
-          ? [{ id: crypto.randomUUID(), changedAt: now, askingPrice: price }]
-          : []),
+        original && original.askingPrice !== price
+          ? [
+              ...original.priceHistory,
+              { id: crypto.randomUUID(), changedAt: now, askingPrice: price },
+            ]
+          : original?.priceHistory ??
+            (price
+              ? [{ id: crypto.randomUUID(), changedAt: now, askingPrice: price }]
+              : []),
       ownerEmail: session?.email,
       quantity: Number(data.quantity) || 1,
       lifecycle,
