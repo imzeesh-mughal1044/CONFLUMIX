@@ -1,4 +1,4 @@
-type IconProps = { name: "search" | "pin" | "menu" | "close" | "arrow" | "user" | "chevron" | "heart" | "package" | "spark" | "plus" | "shop"; size?: number };
+type IconProps = { name: "search" | "pin" | "menu" | "close" | "arrow" | "user" | "chevron" | "heart" | "bell" | "package" | "spark" | "plus" | "shop"; size?: number };
 
 export function Icon({ name, size = 20 }: IconProps) {
   const paths = {
@@ -10,6 +10,7 @@ export function Icon({ name, size = 20 }: IconProps) {
     user: <><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></>,
     chevron: <><path d="m9 18 6-6-6-6"/></>,
     heart: <><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8Z"/></>,
+    bell: <><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9Z"/><path d="M10 21h4"/></>,
     package: <><path d="m12 3 8 4.5v9L12 21l-8-4.5v-9L12 3Z"/><path d="m4.5 7.8 7.5 4.3 7.5-4.3M12 12v9"/></>,
     spark: <><path d="m12 3 1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5L12 3ZM19 16l.7 2.3L22 19l-2.3.7L19 22l-.7-2.3L16 19l2.3-.7L19 16Z"/></>,
     plus: <path d="M12 5v14M5 12h14"/>,

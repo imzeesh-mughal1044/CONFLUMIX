@@ -1,0 +1,22 @@
+"use client";
+import Image from "next/image";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { readPublicUserProfile } from "@/services/account-profile";
+import { readStoredListings } from "@/services/product-listings";
+import { readLocalReuseListings } from "@/services/reuse";
+import { PublicShell } from "@/components/public/public-shell";
+
+export function PublicUserProfile({userId}:{userId:string}){
+  const [state,setState]=useState<ReturnType<typeof readPublicUserProfile>|undefined>(undefined);
+  useEffect(()=>{queueMicrotask(()=>setState(readPublicUserProfile(userId)))},[userId]);
+  if(state===undefined)return <PublicShell><div className="public-profile-state" role="status"><div className="public-profile-skeleton"/><p>Loading public profile…</p></div></PublicShell>;
+  if(!state)return <PublicShell><div className="public-profile-state"><p className="section-kicker">Public profile</p><h1>Profile unavailable</h1><p>This public profile could not be found or is not available. No private account information has been disclosed.</p><Link className="button button--primary" href="/marketplace">Return to Marketplace</Link></div></PublicShell>;
+  const profile=state,products=readStoredListings().filter(item=>item.status==="published"&&item.id&&(!profile.storeId||!item.storeId||item.storeId===profile.storeId)),reuse=readLocalReuseListings().filter(item=>item.ownerEmail?.toLowerCase()===profile.ownerEmail.toLowerCase()&&(item.lifecycle??"published")==="published"&&item.status!=="Removed"),initials=profile.displayName.split(/\s+/).slice(0,2).map(part=>part[0]).join("").toUpperCase(),storeAvailable=profile.newProductSeller&&Boolean(profile.storeId);
+  const roles=[profile.newProductSeller&&"New Product Seller",profile.reuseSeller&&"Reuse Seller"].filter(Boolean) as string[];
+  return <PublicShell><div className="public-profile-page"><div className="page-container">
+    <header className="public-profile-header"><div className="public-profile-avatar">{profile.avatarUrl?<Image src={profile.avatarUrl} alt={`${profile.displayName}'s profile`} width={132} height={132} unoptimized/>:<span aria-hidden="true">{initials||"C"}</span>}</div><div><p className="section-kicker">Marketplace participant</p><h1>{profile.displayName}</h1><div className="public-profile-roles">{roles.length?roles.map(role=><span key={role}>{role}</span>):<span>Individual Marketplace Participant</span>}</div>{profile.bio?<p>{profile.bio}</p>:<p className="is-muted">No public description has been added.</p>}{profile.locality&&<small>{profile.locality}</small>}</div><div className="public-profile-actions"><Link className="button button--primary" href="#public-listings">View Listings</Link>{storeAvailable&&<Link className="button button--secondary" href={`/stores/${profile.storeId}`}>View Store</Link>}<Link href="/marketplace">Return to Marketplace</Link></div></header>
+    <section className="public-profile-summary" aria-label="Public activity summary"><div><strong>{products.length+reuse.length}</strong><span>Public listings</span></div>{products.length>0&&<div><strong>{products.length}</strong><span>New Products</span></div>}{reuse.length>0&&<div><strong>{reuse.length}</strong><span>Reuse listings</span></div>}</section>
+    <section className="public-listings" id="public-listings"><div className="public-profile-section-head"><div><p className="section-kicker">Currently visible</p><h2>Public listings</h2></div></div>{products.length||reuse.length?<div className="public-listing-grid">{products.map(item=><Link href={`/new-products/${item.id}`} key={`product-${item.id}`}><div className="public-listing-image">{item.images[0]?.src?<Image src={item.images[0].src} alt="" fill sizes="(max-width: 600px) 100vw, 280px" unoptimized/>:<span>No image</span>}</div><span>New Product · {item.category}</span><h3>{item.title}</h3><strong>PKR {Number(item.price).toLocaleString("en-PK")}</strong></Link>)}{reuse.map(item=><Link href={`/reuse/${item.id}`} key={`reuse-${item.id}`}><div className="public-listing-image"><Image src={item.media[0]?.src||item.image||"/marketplace/used-laptop.png"} alt="" fill sizes="(max-width: 600px) 100vw, 280px" unoptimized/></div><span>Reuse · {item.category}</span><h3>{item.title}</h3><strong>PKR {item.askingPrice.toLocaleString("en-PK")}</strong></Link>)}</div>:<div className="dashboard-empty"><strong>No public listings</strong><p>This participant does not currently have eligible public listings.</p></div>}</section>
+  </div></div></PublicShell>
+}

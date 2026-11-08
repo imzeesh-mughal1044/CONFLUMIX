@@ -3,233 +3,52 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { readAuthSession, type AuthSession } from "@/lib/auth";
-import {
-  hasNewProductIntent,
-  newProductOnboardingStage,
-  nextNewProductOnboardingRoute,
-  readSellerOnboarding,
-} from "@/services/seller-onboarding";
+import { profileCompletion, readUserProfile } from "@/services/account-profile";
+import { readBuyerOrders } from "@/services/orders";
+import { readStoredListings } from "@/services/product-listings";
+import { readLocalReuseListings } from "@/services/reuse";
+import { readReuseOffers } from "@/services/reuse-offers";
+import { getProposalsBySolver, getProposalsForTask, getTasksByOwner } from "@/services/task-proposals";
+import { hasNewProductIntent, newProductOnboardingStage, nextNewProductOnboardingRoute, readSellerOnboarding } from "@/services/seller-onboarding";
+import { newProductListingEligibility, readSellerSetup, reuseSetupComplete } from "@/services/seller-setup";
+import { readNotifications } from "@/services/notifications";
 import type { SellerOnboardingRecord } from "@/types/seller-onboarding";
+import type { UserProfile } from "@/types/account";
 import { PublicShell } from "./public-shell";
-const unavailable =
-  "This area will become available when its marketplace workflow is implemented.";
-export function PersonalDashboardPage() {
-  const router = useRouter(),
-    [session, setSession] = useState<AuthSession | null>(null),
-    [record, setRecord] = useState<SellerOnboardingRecord | null>(null),
-    [ready, setReady] = useState(false);
-  useEffect(() => {
-    void readAuthSession().then((value) => {
-      if (!value) {
-        router.replace("/auth/login?next=%2Fdashboard");
-        return;
-      }
-      setSession(value);
-      setRecord(readSellerOnboarding(value.email));
-      setReady(true);
-    });
-  }, [router]);
-  if (!ready)
-    return (
-      <PublicShell>
-        <div className="route-loading" role="status">
-          Loading your account…
-        </div>
-      </PublicShell>
-    );
-  const hasNew = hasNewProductIntent(record),
-    stage = hasNew ? newProductOnboardingStage() : "none",
-    reuse = Boolean(record?.reuseInterestSavedAt);
-  return (
-    <PublicShell>
-      <div className="account-dashboard">
-        <div className="page-container">
-          <section
-            className="dashboard-welcome"
-            aria-labelledby="dashboard-title"
-          >
-            <div>
-              <p className="section-kicker">Personal dashboard</p>
-              <h1 id="dashboard-title">
-                Welcome back, {session?.fullName || "Member"}.
-              </h1>
-              <p>
-                Your CONFLUMIX account begins as a buyer account. Selling is
-                optional and marketplace-specific.
-              </p>
-            </div>
-            <Link className="button button--primary" href="/marketplace">
-              Explore marketplace
-            </Link>
-          </section>
-          <section className="dashboard-status" aria-label="Account status">
-            <div>
-              <span>Account</span>
-              <strong>Registered buyer</strong>
-            </div>
-            <div>
-              <span>New Product selling</span>
-              <strong>
-                {stage === "complete"
-                  ? "Ready"
-                  : stage === "categories"
-                    ? "Category setup needed"
-                    : stage === "profile"
-                      ? "Profile in progress"
-                      : "Not started"}
-              </strong>
-            </div>
-            <div>
-              <span>Reuse selling</span>
-              <strong>{reuse ? "Interest saved" : "Not started"}</strong>
-            </div>
-          </section>
-          <div className="dashboard-layout">
-            <main>
-              <section className="dashboard-section">
-                <div className="dashboard-heading">
-                  <div>
-                    <p className="section-kicker">Activity overview</p>
-                    <h2>Your marketplace activity</h2>
-                  </div>
-                  <p>
-                    Counts remain unavailable until account activity is
-                    connected.
-                  </p>
-                </div>
-                <div className="activity-grid">
-                  <Activity label="Orders" />
-                  <Activity label="Product listings" />
-                  <div className="activity-card activity-card--linked">
-                    <span>Task activity</span>
-                    <strong>Available</strong>
-                    <div><Link href="/dashboard/tasks/posted">Posted tasks</Link><Link href="/dashboard/tasks/proposals">My proposals</Link></div>
-                  </div>
-                  <Activity label="Donations" />
-                </div>
-              </section>
-              <section className="dashboard-section">
-                <div className="dashboard-heading">
-                  <div>
-                    <p className="section-kicker">Quick actions</p>
-                    <h2>Continue across CONFLUMIX</h2>
-                  </div>
-                </div>
-                <div className="quick-action-grid">
-                  <Link href="/new-products">
-                    <strong>Browse new products</strong>
-                    <span>Explore products and local stores.</span>
-                  </Link>
-                  <Link href="/tasks/new">
-                    <strong>Post a task</strong>
-                    <span>Describe a focused problem and the outcome you need.</span>
-                  </Link>
-                  <UnavailableAction title="Donate a resource" />
-                </div>
-              </section>
-            </main>
-            <aside
-              className="seller-center"
-              aria-labelledby="seller-center-title"
-            >
-              <p className="section-kicker">Selling on CONFLUMIX</p>
-              <h2 id="seller-center-title">
-                {!record
-                  ? "Become a seller when you are ready."
-                  : stage === "complete"
-                    ? "Your New Product store is ready."
-                    : hasNew
-                      ? "Continue your seller setup."
-                      : "Your Reuse interest is saved."}
-              </h2>
-              <p>
-                New Products and Reuse use independent seller journeys. Your
-                buyer access is unchanged.
-              </p>
-              {hasNew && (
-                <SellerState
-                  title="New Product Marketplace"
-                  status={
-                    stage === "complete"
-                      ? "Onboarding complete"
-                      : stage === "categories"
-                        ? "Profile complete"
-                        : "Setup started"
-                  }
-                />
-              )}{" "}
-              {reuse && (
-                <SellerState
-                  title="Reuse Marketplace"
-                  status="Registration coming soon"
-                />
-              )}
-              <div className="seller-center__actions">
-                {!record ? (
-                  <Link href="/become-a-seller">Become a Seller</Link>
-                ) : hasNew ? (
-                  <Link
-                    href={
-                      stage === "complete"
-                        ? "/dashboard/new-products"
-                        : nextNewProductOnboardingRoute()
-                    }
-                  >
-                    {stage === "complete"
-                      ? "Open New Product Seller Center"
-                      : "Continue New Product Setup"}
-                  </Link>
-                ) : (
-                  <Link href="/become-a-seller">
-                    View seller marketplace status
-                  </Link>
-                )}
-                {record && (
-                  <Link href="/become-a-seller">
-                    Seller marketplace options
-                  </Link>
-                )}
-              </div>
-              {reuse && (
-                <p className="seller-center__note">
-                  Reuse seller onboarding is not open yet. No New Product
-                  profile is created from this selection.
-                </p>
-              )}
-            </aside>
-          </div>
-        </div>
-      </div>
-    </PublicShell>
-  );
+
+type Metric={label:string;value:number;detail:string;href:string};
+type Feed={title:string;description:string;at:string;mode:string;href:string;status:string};
+export function PersonalDashboardPage(){
+  const router=useRouter(),[session,setSession]=useState<AuthSession|null>(null),[profile,setProfile]=useState<UserProfile|null>(null),[record,setRecord]=useState<SellerOnboardingRecord|null>(null),[ready,setReady]=useState(false);
+  useEffect(()=>{void readAuthSession().then(value=>{if(!value){router.replace("/auth/login?next=%2Fdashboard");return}setSession(value);setProfile(readUserProfile(value));setRecord(readSellerOnboarding(value.email));setReady(true)})},[router]);
+  if(!ready||!session||!profile)return <PublicShell><div className="route-loading" role="status">Loading your account…</div></PublicShell>;
+  const email=session.email.toLowerCase(),setup=readSellerSetup(),hasNew=hasNewProductIntent(record),stage=hasNew?newProductOnboardingStage():"none",newEligibility=newProductListingEligibility(setup),reuseEligible=reuseSetupComplete(setup);
+  const tasks=getTasksByOwner(session.email,session.fullName),proposals=getProposalsBySolver(session.email),orders=readBuyerOrders(session.email,session.fullName),reuseListings=readLocalReuseListings().filter(item=>item.ownerEmail?.toLowerCase()===email),reuseOffers=readReuseOffers().filter(item=>item.buyerEmail.toLowerCase()===email||item.sellerEmail?.toLowerCase()===email),productListings=hasNew?readStoredListings():[];
+  const received=tasks.flatMap(task=>getProposalsForTask(task.id).filter(item=>item.status==="pending")),pendingOrders=orders.filter(item=>!["completed","cancelled","returned"].includes(item.status)),pendingProposals=proposals.filter(item=>item.status==="pending"),pendingCount=received.length+pendingOrders.length+pendingProposals.length;
+  const metrics:Metric[]=[];
+  if(productListings.length)metrics.push({label:"My Active Listings",value:productListings.filter(item=>item.status==="published").length,detail:"New Product listings",href:"/dashboard/new-products/products"});
+  if(orders.length)metrics.push({label:"My Orders",value:orders.length,detail:`${pendingOrders.length} still in progress`,href:"/dashboard/new-products/orders"});
+  if(reuseListings.length||reuseOffers.length)metrics.push({label:"My Reuse Offers",value:reuseOffers.length,detail:`${reuseListings.length} owned listings`,href:"/dashboard/reuse/listings"});
+  if(tasks.length)metrics.push({label:"My Posted Tasks",value:tasks.length,detail:`${received.length} proposals need review`,href:"/dashboard/tasks/posted"});
+  if(proposals.length)metrics.push({label:"My Proposals",value:proposals.length,detail:`${pendingProposals.length} awaiting a decision`,href:"/dashboard/tasks/proposals"});
+  if(pendingCount)metrics.push({label:"Pending Actions",value:pendingCount,detail:"Across your recorded activity",href:"#pending-actions"});
+  const feed:Feed[]=[...tasks.map(item=>({title:"Task activity",description:item.title,at:"updatedAt" in item?item.updatedAt:item.createdAt,mode:"Tasks",href:`/tasks/${item.id}`,status:item.status})),...proposals.map(item=>({title:"Proposal update",description:item.latestUpdate,at:item.updatedAt,mode:"Tasks",href:"/dashboard/tasks/proposals",status:item.status})),...orders.map(item=>({title:"Order update",description:`Order ${item.reference}`,at:item.updatedAt,mode:"New Products",href:"/dashboard/new-products/orders",status:item.status})),...reuseListings.map(item=>({title:"Reuse listing",description:item.title,at:item.updatedAt??item.createdAt,mode:"Reuse",href:`/reuse/${item.id}`,status:item.lifecycle??"published"}))].sort((a,b)=>b.at.localeCompare(a.at)).slice(0,6);
+  const upcoming=tasks.filter(task=>task.deadline>="2026-11-08").sort((a,b)=>a.deadline.localeCompare(b.deadline)).slice(0,3),notifications=readNotifications(session).slice(0,3),sellerRelevant=Boolean(record||productListings.length||reuseListings.length);
+  return <PublicShell><div className="account-dashboard"><div className="page-container">
+    <section className="dashboard-welcome" aria-labelledby="dashboard-title"><div className="dashboard-identity"><span className="dashboard-avatar" aria-hidden="true">{(profile.displayName||session.fullName).slice(0,1).toUpperCase()}</span><div><p className="section-kicker">Personal dashboard</p><h1 id="dashboard-title">Welcome back, {profile.displayName||session.fullName}.</h1><p>Your shared workspace for marketplace activity, decisions, and the next useful action.</p></div></div><Link className="button button--primary" href="/marketplace">Explore Marketplace</Link></section>
+    <section className="dashboard-status" aria-label="Account status"><div><span>Account status</span><strong>Active member</strong></div><div><span>Profile completion</span><strong>{profileCompletion(profile)}%</strong><Link href="/account/profile">Review profile</Link></div><div><span>Activity requiring attention</span><strong>{pendingCount?`${pendingCount} pending`:"All caught up"}</strong></div></section>
+    <div className="dashboard-layout"><main>
+      <Section kicker="Activity overview" title="Your marketplace activity"><div className="activity-grid">{metrics.length?metrics.map(metric=><Link className="activity-card" href={metric.href} key={metric.label}><span>{metric.label}</span><strong>{metric.value}</strong><small>{metric.detail}</small></Link>):<Empty title="No account activity yet" copy="Explore a marketplace, post a task, or update your profile to begin building your workspace." action="Explore Marketplace" href="/marketplace"/>}</div></Section>
+      <Section kicker="Continue across CONFLUMIX" title="Marketplace shortcuts"><div className="quick-action-grid"><Shortcut href="/marketplace" title="Explore Marketplace" copy="Browse all four exchange modes."/><Shortcut href={newEligibility.eligible?"/new-products/sell/new":"/become-a-seller"} title="Create Listing" copy={newEligibility.eligible?"Add a New Product listing.":"Review selling options and eligibility."}/><Shortcut href="/tasks/new" title="Post Task" copy="Describe the outcome you need."/><Shortcut href="/donations/new" title="Donate Resource" copy="Offer a useful resource locally."/><Shortcut href="/account/orders" title="View Orders" copy="Review orders and supported transaction records."/><Shortcut href="/account/activity" title="View Activity" copy="See your complete recorded history."/></div><div className="task-links"><Link href="/dashboard/tasks/posted">My Posted Tasks</Link><Link href="/dashboard/tasks/proposals">My Proposals</Link></div></Section>
+      <Section id="recent-activity" kicker="Across your account" title="Recent activity">{feed.length?<div className="dashboard-feed">{feed.map((item,index)=><Link href={item.href} key={`${item.href}-${index}`}><span className="feed-marker"/><div><strong>{item.title}</strong><p>{item.description}</p><small>{item.mode} · {formatDate(item.at)}</small></div><b>{item.status.replaceAll("-"," ")}</b></Link>)}</div>:<Empty title="No recent activity" copy="Updates from your listings, orders, tasks, and proposals will appear here."/>}</Section>
+      <Section id="pending-actions" kicker="Needs your response" title="Pending approvals and decisions">{pendingCount?<div className="pending-list">{received.length>0&&<Pending title={`${received.length} task ${received.length===1?"proposal":"proposals"} to review`} copy="Compare submissions and decide how to continue." href="/dashboard/tasks/posted"/>}{pendingProposals.length>0&&<Pending title={`${pendingProposals.length} submitted ${pendingProposals.length===1?"proposal is":"proposals are"} pending`} copy="Track the task owner’s decision." href="/dashboard/tasks/proposals"/>}{pendingOrders.length>0&&<Pending title={`${pendingOrders.length} ${pendingOrders.length===1?"order is":"orders are"} in progress`} copy="Review the latest recorded order status." href="/dashboard/new-products/orders"/>}</div>:<Empty title="Nothing needs your response" copy="Pending decisions will appear only when an implemented workflow records one."/>}</Section>
+      <div className="dashboard-two-column"><Section kicker="Time-sensitive" title="Deadlines and reminders">{upcoming.length?<div className="reminder-list">{upcoming.map(task=><Link href={`/tasks/${task.id}`} key={task.id}><strong>{task.title}</strong><span>Due {formatDate(task.deadline)}</span></Link>)}</div>:<Empty title="No upcoming deadlines" copy="Task deadlines connected to your account will appear here."/>}</Section><Section kicker="Account updates" title="Recent notifications">{notifications.length?<div className="reminder-list">{notifications.map(item=><Link href="/account/notifications" key={item.id}><strong>{item.title}</strong><span>{formatDate(item.occurredAt)}</span></Link>)}</div>:<Empty title="No notifications yet" copy="Supported marketplace updates will appear here when recorded."/>}</Section></div>
+    </main>{sellerRelevant&&<aside className="seller-center" aria-labelledby="seller-center-title"><p className="section-kicker">Seller Center</p><h2 id="seller-center-title">Selling remains optional and mode-specific.</h2><p>New Product and Reuse configuration stay independent. Task participation never depends on seller setup.</p>{hasNew&&<SellerState title="New Product selling" status={stage==="complete"?"Ready":stage==="categories"?"Categories needed":"Profile setup needed"}/>} {(record?.reuseInterestSavedAt||reuseListings.length>0)&&<SellerState title="Reuse selling" status={reuseEligible?"Ready":"Setup incomplete"}/>}<div className="seller-center__actions"><Link href={hasNew?(stage==="complete"?"/dashboard/new-products":nextNewProductOnboardingRoute()):"/become-a-seller"}>Seller Center</Link>{hasNew&&<Link href="/dashboard/seller-center/new-products/categories">Manage New Product Categories</Link>}{(record?.reuseInterestSavedAt||reuseListings.length>0)&&<Link href="/dashboard/seller-center/reuse/categories">Manage Reuse Categories</Link>}{newEligibility.eligible&&<Link href="/new-products/sell/new">Add Product</Link>}{reuseEligible&&<Link href="/reuse/sell/new">List Reuse Item</Link>}</div></aside>}</div>
+  </div></div></PublicShell>
 }
-function Activity({ label }: { label: string }) {
-  return (
-    <article>
-      <span>{label}</span>
-      <strong>—</strong>
-      <small>Not connected</small>
-    </article>
-  );
-}
-function SellerState({ title, status }: { title: string; status: string }) {
-  return (
-    <div className="seller-state">
-      <span>{title}</span>
-      <strong>{status}</strong>
-    </div>
-  );
-}
-function UnavailableAction({ title }: { title: string }) {
-  return (
-    <button
-      className="quick-action--disabled"
-      type="button"
-      disabled
-      title={unavailable}
-    >
-      <strong>{title}</strong>
-      <span>{unavailable}</span>
-    </button>
-  );
-}
+function Section({kicker,title,id,children}:{kicker:string;title:string;id?:string;children:React.ReactNode}){return <section className="dashboard-section" id={id}><div className="dashboard-heading"><div><p className="section-kicker">{kicker}</p><h2>{title}</h2></div></div>{children}</section>}
+function Shortcut({href,title,copy}:{href:string;title:string;copy:string}){return <Link href={href}><strong>{title}</strong><span>{copy}</span></Link>}
+function Empty({title,copy,action,href}:{title:string;copy:string;action?:string;href?:string}){return <div className="dashboard-empty"><strong>{title}</strong><p>{copy}</p>{action&&href&&<Link href={href}>{action}</Link>}</div>}
+function Pending({title,copy,href}:{title:string;copy:string;href:string}){return <article><div><strong>{title}</strong><p>{copy}</p></div><Link href={href}>Review</Link></article>}
+function SellerState({title,status}:{title:string;status:string}){return <div className="seller-state"><span>{title}</span><strong>{status}</strong></div>}
+function formatDate(value:string){try{return new Intl.DateTimeFormat("en-PK",{dateStyle:"medium"}).format(new Date(value))}catch{return "Date unavailable"}}

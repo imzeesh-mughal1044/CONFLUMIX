@@ -1,0 +1,1 @@
+import type { Metadata } from "next";import { SavedItemsPage } from "@/components/account/saved-items-page";export const metadata:Metadata={title:"Saved Items"};export default function Page(){return <SavedItemsPage/>}

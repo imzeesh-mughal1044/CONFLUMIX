@@ -66,6 +66,14 @@ export function getAuthClient() {
   return client;
 }
 
+export async function signOutAccount() {
+  if (authConfigured) {
+    const { error } = await getAuthClient().auth.signOut();
+    if (error) throw error;
+  }
+  localStorage.removeItem(frontendSessionKey);
+}
+
 export function safeReturnPath(value: string | null, fallback = "/") {
   if (
     !value ||
