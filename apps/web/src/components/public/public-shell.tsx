@@ -54,7 +54,7 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
     <footer className="public-footer">
       <div className="public-footer__main">
         <div className="footer-brand"><Image src="/CONFLUMIX_nav.png" alt="CONFLUMIX" width={990} height={185} sizes="180px"/><p>One shared platform for products, reuse, practical work, and community support.</p></div>
-        <div><h2>Explore</h2><Link href="/marketplace">Marketplace</Link><Link href="/discover">Local discovery</Link><Link href="/insights">Marketplace insights</Link><Link href="/search">Search</Link></div>
+        <div><h2>Explore</h2><Link href="/marketplace">Marketplace</Link><Link href="/discover">Local discovery</Link><Link href="/search">Search</Link></div>
         <div><h2>Account</h2><Link href="/dashboard">Personal dashboard</Link><Link href="/account/profile">My profile</Link><Link href="/account/settings">Account settings</Link><Link href="/account/verification">Verification status</Link><Link href="/auth/forgot-password">Account recovery</Link></div>
         <div><h2>Trust & support</h2><Link href="/privacy">Privacy notice</Link><Link href="/terms">Terms</Link><Link href="/auth/required?next=/marketplace">Safety and support</Link></div>
       </div>

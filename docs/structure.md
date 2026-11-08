@@ -260,56 +260,6 @@ To maintain a clean, scalable, and professional repository, the following rules 
 
 This concludes the structural specification for the CONFLUMIX repository.
 
-## Part 8 / Group 50 — Unified Marketplace Insights
-
-- `/insights` provides DS-01, a public analytics view over current frontend marketplace records.
-- `apps/web/src/services/marketplace-insights.ts` normalizes only eligible public New Product supply, Reuse supply, open Task demand, and Donation resource/need records for transparent local filtering and aggregation.
-- The interface preserves mode-specific meanings, exposes date, category, and locality filters, and reports unavailable skill-supply, completion, and cross-mode relationship analytics rather than estimating them.
-- Donation results are explicitly identified as demonstration data. No Python analytics service, production endpoint, predictive model, or export contract is introduced.
-
-## Part 8 / Group 51 — New Product and Reuse Insights
-
-- `/insights/new-products` provides DS-02 using public product records from the shared frontend product service. It reports listing/category distribution, current stock-based availability, available units, unique public seller-label counts, anonymized seller listing volume, and listing creation activity.
-- DS-02 date filters apply to listing creation while availability is a current-state observation. Orders, returns, issues, completed sales, and purchase failures remain unavailable on this public route because order data is participant-scoped browser storage and no purchase-failure event source exists.
-- `/insights/reuse` provides DS-03 using published Reuse records from the shared Reuse service. It reports category, condition, classification, status, observed listing age, and current asking-price summaries with date, category, condition, status, and asking-price filters.
-- Reuse age is measured in whole days from creation to refresh because reliable listing end timestamps are absent; it is not represented as time to sale. Asking-price mean, median, minimum, and maximum are not transaction values or valuation advice.
-- Reuse offers and completed transactions are not publicly aggregated because offers are participant-scoped and acceptance does not prove handover. Fair-market references are unavailable because comparable sample sizes and verified completed prices are insufficient.
-- Both focused pages share `apps/web/src/services/mode-insights.ts` and `apps/web/src/components/insights/insight-ui.tsx`. Processing remains frontend-only; no Python service, database endpoint, export contract, or predictive pricing model is connected.
-
-## Part 8 / Group 52 — Task and Donation Insights
-
-- `/insights/tasks` provides DS-04 using public fixture and browser-local authored task records. It reports task/category/status/locality creation counts and structured skill demand, deduplicating each skill within a task.
-- DS-04 date filtering applies to task creation timestamps. Open-task eligibility reuses the Task service deadline and status rule. The completed card is an absolute current-status count, not a rate.
-- Proposal activity, solver-selection rates, and time-to-completion remain unavailable because proposal/workroom records are participant-scoped and no complete public cohort with reliable start and completion timestamps exists. No matching, ranking, assignment, or prediction is performed.
-- `/insights/donations` provides DS-05 over eligible donation demonstration resources and active needs. It reports resource and need record counts by category, status, locality, and creation month, plus unmatched needs from the existing deterministic compatibility evaluator.
-- Donation availability requires positive quantity and an Available or Limited state. Original quantity units are preserved and never summed across incompatible resources. Active needs are Open or Partially Matched; unmatched needs are not calculated by subtraction.
-- Fictional handover fixtures are excluded from completed-impact analytics. Response times, contributed value, material diversion, and carbon impact remain unavailable because reliable relationships, valuation fields, compatible weights, and approved methodologies do not exist.
-- DS-04 and DS-05 extend the shared `mode-insights.ts` processing layer and `insight-ui.tsx` navigation/chart components. No API endpoint, database integration, Python analytics module, export contract, or operational workflow was added.
-
-## Group 53 — Administrative Capability Boundary
-
-- `/admin` and `/admin/verifications` provide non-indexed capability-boundary pages for ADM-01 and ADM-02. They expose no operational, applicant, document, marketplace, or decision data and provide no administrative mutation controls.
-- Operational administration is intentionally blocked because the current authentication model contains no server-validated administrator or reviewer role. Frontend sessions contain only browser-local email and display-name values, which are not an authorization source.
-- The existing applicant-facing `/account/verification` remains backed by a single browser-local seller setup record. There is no shared verification-submission queue, organization-review model, secure evidence storage, reviewer assignment, server decision service, audit log, or authorized review notification integration.
-- Pending verification, listing moderation, reported-issue, and administrative-activity metrics are unavailable because their required case stores do not exist. No active listing is misclassified as awaiting review and no history is fabricated.
-- Making ADM-01 or ADM-02 operational requires server-side role enforcement, a shared submission schema, validated status transitions, secure evidence access where applicable, audit retention, and committed-decision notifications. Local storage, hidden navigation, hardcoded identities, and client-only guards are explicitly rejected as security controls.
-
-## Group 54 — Listing Moderation Capability Boundary
-
-- `/admin/listings` provides ADM-03 as a non-indexed, blocked administrative capability surface. It exposes no listings, owners, images, queue metrics, moderation decisions, or administrative actions.
-- Existing New Product, Reuse, Task, and Donation status fields describe publication, inventory, offer, task, or resource workflows; none establishes a moderation submission, reviewer assignment, decision status, or resubmission event. Active or published records are not reclassified as awaiting review.
-- Approval, rejection, change requests, review history, owner notifications, and concurrent decision handling are unavailable because no server-authorized reviewer role, moderation case store, mode-aware transition service, audit log, or versioned decision endpoint exists.
-- Public listing pages and owner editing workflows remain unchanged. ADM-03 does not create a parallel lifecycle, listing editor, local-storage moderation queue, hardcoded administrator, or simulated decision history.
-- Operational moderation requires server-side record-level permissions, explicit per-mode review eligibility, preserved submission snapshots, validated transitions, optimistic concurrency or transactions, owner correction and resubmission integration, audit retention, and post-commit notifications.
-
-## Group 55 — Reports and Administrative Activity Boundaries
-
-- `/admin/reports` provides ADM-04 as a non-indexed blocked capability surface. No user report form, report record, supported category, target relationship, reporter privacy policy, evidence store, review status, or resolution service exists, so no queue or moderation action is presented.
-- Marketplace inactivity, listing removal, order cancellation, task revision, and donation workflow states are not interpreted as reports. Reporter identities, descriptions, evidence, review notes, related records, and histories are neither exposed nor fabricated.
-- `/admin/activity` provides ADM-05 as a separate non-indexed blocked capability surface. Personal activity, notifications, order histories, offers, task workrooms, and donation histories remain operational user records and are not represented as administrative audit events.
-- No server-validated administrator actor, append-only audit schema, before-and-after state, reason field, integrity protection, retention policy, restricted export, or administrative event source exists. Consequently no activity rows, actors, timestamps, or exports are shown.
-- Operational ADM-04 and ADM-05 require server-side roles and record-level permissions, report submission and privacy policy, validated report transitions, concurrency control, post-commit notifications, authenticated audit emission, immutable storage, and approved retention and export policies.
-
 ## Group 45 — Shared Orders, Transactions, and Reviews
 
 - `/account/orders` provides an authenticated overview of attributable New Product orders, Reuse offers, and task workrooms while retaining each workflow's real status, role, history, and valid routes.
@@ -323,28 +273,6 @@ This concludes the structural specification for the CONFLUMIX repository.
 - Locality and privacy changes persist through the existing browser-local profile service. Notification delivery preferences, session/device management, two-factor authentication, email changes, and account deletion are omitted because supporting infrastructure does not exist.
 - `/account/verification` summarizes only the existing seller-onboarding review state and links permitted continuation to Seller Center. It does not collect sensitive documents or create a parallel verification submission.
 - Seller review is a browser-local prototype workflow. There is no NADRA, SECP, FBR, banking, government, or secure reviewer/upload integration, and no status is represented as legal identity or regulatory verification.
-
-## Part 7 / Group 47 — Cross-Mode Exchange Activity
-
-- `/account/exchange-activity` provides XMD-01, an authenticated lifecycle view across attributable New Product orders, Reuse offers, and Task postings, proposals, and workrooms.
-- `apps/web/src/services/exchange-activity.ts` is a read-only normalization layer over the existing mode services. It preserves original statuses and permissions, calculates presentation lifecycles, sorts actual timestamps, and routes actions back to the original workflows.
-- `apps/web/src/types/exchange-activity.ts` defines frontend presentation records and lifecycle events; it is not a transaction database or source of marketplace truth.
-- Donation fixtures are not integrated as personal activity because their resource, claim, and handover models lack signed-in-account ownership fields. The interface reports this limitation rather than fabricating attribution.
-- The unified timeline contains only recorded order history, offer history, workroom activity, and reliable record updates. It does not infer payment, delivery, handover, or completion events.
-
-## Part 7 / Group 48 — Ownership and Cross-Mode Transitions
-
-- `/account/items/[itemId]/lifecycle` provides an authenticated ownership-evidence review for buyer order items and links back to XMD-01 and USER-07.
-- `apps/web/src/services/item-lifecycle.ts` resolves an item only from orders attributable to the current buyer and returns the actual order snapshot, status, restrictions, and history without creating an ownership record.
-- Cross-mode transitions are intentionally unavailable: demo checkout records do not establish payment, delivery, or ownership; there is no ownership ledger; and Reuse and Donation records have no source-order relationship fields or safe prefill contract.
-- The page does not expose Mark No Longer Needed, create listings, infer related records, or generate transition history. XMD-01 links buyer order items to the eligibility review without changing the authoritative order.
-
-## Part 7 / Group 49 — Cross-Mode Transition Confirmation
-
-- `/account/items/[itemId]/transition?destination=reuse|donation` provides a refresh-safe XMD-03 confirmation preview for an authorized buyer order item.
-- The page reuses `item-lifecycle.ts` to revalidate account attribution on every load and retry. It distinguishes potential source fields, destination-specific required information, and private or incompatible fields that cannot carry over.
-- Continuation remains blocked because ownership is not established and neither destination workflow accepts a trusted source-item relationship or cross-mode draft. The interface creates no draft, listing, activity event, claim, handover, ownership transfer, or source-record mutation.
-- XMD-02 remains the required entry context. Because all current items are ineligible, it exposes no transition launch control; the deep route safely reports the same restriction if opened directly.
 # New Product Shop Sections
 
 - `/dashboard/new-products/sections` is the shared Seller Center management route for flat, seller-defined storefront sections.
