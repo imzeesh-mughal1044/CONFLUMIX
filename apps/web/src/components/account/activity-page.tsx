@@ -1,0 +1,23 @@
+"use client";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
+import { readAuthSession, type AuthSession } from "@/lib/auth";
+import { readAccountActivity } from "@/services/account-activity";
+import type { AccountActivityEvent, ActivityMode } from "@/types/account";
+import { PublicShell } from "@/components/public/public-shell";
+
+const modes:["all"|ActivityMode,string][]=[["all","All Activity"],["new-products","New Product"],["reuse","Reuse"],["tasks","Tasks & Soft Skills"],["donations","Donations & Social Impact"],["handover","Handover"],["account","Account"]];
+export function ActivityPage(){
+  const router=useRouter(),[session,setSession]=useState<AuthSession|null>(null),[events,setEvents]=useState<AccountActivityEvent[]>([]),[ready,setReady]=useState(false),[refreshing,setRefreshing]=useState(false),[mode,setMode]=useState<"all"|ActivityMode>("all"),[from,setFrom]=useState(""),[to,setTo]=useState(""),[error,setError]=useState("");
+  useEffect(()=>{void readAuthSession().then(value=>{if(!value){router.replace("/auth/login?next=%2Faccount%2Factivity");return}setSession(value);setEvents(readAccountActivity(value));setReady(true)})},[router]);
+  const dateError=from&&to&&from>to?"The start date must be on or before the end date.":"";
+  const filtered=useMemo(()=>dateError?[]:events.filter(item=>(mode==="all"||item.mode===mode)&&(!from||item.occurredAt.slice(0,10)>=from)&&(!to||item.occurredAt.slice(0,10)<=to)),[events,mode,from,to,dateError]);
+  async function refresh(){if(!session)return;setRefreshing(true);setError("");try{await new Promise(resolve=>setTimeout(resolve,200));setEvents(readAccountActivity(session))}catch{setError("Activity could not be refreshed. Please try again.")}finally{setRefreshing(false)}}
+  if(!ready)return <PublicShell><div className="route-loading" role="status">Loading your activity…</div></PublicShell>;
+  return <PublicShell><div className="activity-page"><div className="page-container"><header className="activity-hero"><div><p className="section-kicker">Shared account</p><h1>My Activity</h1><p>A chronological view built only from marketplace and profile events recorded for your signed-in account.</p></div><button className="button button--primary" type="button" onClick={refresh} disabled={refreshing}>{refreshing?"Refreshing…":"Refresh Activity"}</button></header>
+    {error&&<div className="activity-error" role="alert">{error}</div>}<section className="activity-controls" aria-label="Activity filters"><label><span>Filter by mode</span><select value={mode} onChange={event=>setMode(event.target.value as "all"|ActivityMode)}>{modes.map(([value,label])=><option value={value} key={value}>{label}</option>)}</select></label><label><span>From</span><input type="date" value={from} onChange={event=>setFrom(event.target.value)}/></label><label><span>To</span><input type="date" value={to} min={from||undefined} aria-invalid={Boolean(dateError)} aria-describedby={dateError?"activity-date-error":undefined} onChange={event=>setTo(event.target.value)}/></label><button type="button" onClick={()=>{setMode("all");setFrom("");setTo("")}}>Clear filters</button>{dateError&&<p id="activity-date-error" role="alert">{dateError}</p>}</section>
+    <section className="activity-timeline" aria-labelledby="activity-history-title"><div className="activity-heading"><div><p className="section-kicker">Recorded events</p><h2 id="activity-history-title">Activity history</h2></div><span>{filtered.length} {filtered.length===1?"event":"events"}</span></div>{filtered.length?<ol>{filtered.map(item=><li key={item.id}><span className={`activity-dot activity-dot--${item.mode}`} aria-hidden="true"/><article><div><span>{modes.find(([value])=>value===item.mode)?.[1]}</span><time dateTime={item.occurredAt}>{formatDateTime(item.occurredAt)}</time></div><h3>{item.title}</h3><p>{item.detail}</p>{item.recordLabel&&<small>Related record: {item.recordLabel}</small>}<footer>{item.status&&<b>{item.status.replaceAll("-"," ")}</b>}{item.href&&<Link href={item.href}>View Details</Link>}</footer></article></li>)}</ol>:<div className="dashboard-empty"><strong>No recorded activity matches these filters</strong><p>{events.length?"Adjust or clear the active filters to see other recorded events.":"No attributable marketplace or profile events have been recorded for this account yet."}</p></div>}</section>
+  </div></div></PublicShell>
+}
+function formatDateTime(value:string){return new Intl.DateTimeFormat("en-PK",{dateStyle:"medium",timeStyle:"short"}).format(new Date(value))}

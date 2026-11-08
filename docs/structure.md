@@ -122,8 +122,13 @@ These modules will share common platform capabilities (users, locations, listing
 
 | Page ID | Page | Route | Status | Shared dependencies |
 |---|---|---|---|---|
-| USER-01 | Personal Dashboard and Seller Center entry | `/dashboard` | Implemented as a frontend account overview with honest unavailable states for unimplemented account data and future Seller Center destinations | `PublicShell`, shared account language, existing marketplace routes |
-| USER-02 | Seller marketplace selection | `/become-a-seller` | Implemented as an authenticated buyer-to-seller entry with independent New Product, Reuse, and Both intent; Reuse records interest only and does not create a seller profile | `BecomeASellerPage`, account-scoped seller onboarding service, seller route guard |
+| USER-01 | Personal Dashboard | `/dashboard` | Authenticated, activity-adaptive browser-local workspace with account status, conditional metrics, recent activity, pending decisions, task deadlines, marketplace shortcuts, and a seller section shown only for relevant selling intent or activity | `PersonalDashboardPage`, existing order/listing/reuse/task/seller services, shared account profile, `PublicShell` |
+| USER-02 | Shared user profile | `/account/profile` | Implemented as an authenticated browser-local shared profile with view/edit modes, validation, private contact boundaries, fallback avatar, completion status, and cancel/save feedback | `ProfilePage`, account profile service, frontend auth session, `PublicShell` |
+| USER-03 | Public User Profile | `/users/[userId]` | Conditional browser-local public identity page exposing only explicitly enabled display name, avatar, description, locality, eligible published listings, and supported seller modes; private fields, reviews, ratings, verification, and private activity are omitted | `PublicUserProfile`, account profile service, existing product/Reuse listing and seller/store services |
+| USER-04 | My Activity | `/account/activity` | Authenticated reverse-chronological activity view derived from attributable order histories, Reuse listings/offers, owned tasks, proposals, task workroom events, and saved profile updates, with mode/date filters and refresh | `ActivityPage`, account activity aggregator, existing marketplace services |
+| USER-05 | Notifications | `/account/notifications` | Authenticated in-app notification center derived from supported recorded account events, with account-scoped read state, filters, related-record navigation, mark-one/mark-all actions, dashboard reuse, and shared-header unread badge; no external delivery channels | `NotificationsPage`, notification service, account activity service, `PublicShell` |
+| USER-06 | Saved Items | `/account/saved` | Authenticated browser-local saved relationships for New Product and Reuse listings, with marketplace filtering, saved-date sorting, availability resolution, view/remove actions, and save controls on shared listing cards | `SavedItemsPage`, saved-items service, `SaveItemButton`, existing product and Reuse services/cards |
+| SELLER-ENTRY | Seller marketplace selection | `/become-a-seller` | Implemented as an authenticated buyer-to-seller entry with independent New Product, Reuse, and Both intent; Reuse records interest only and does not create a seller profile | `BecomeASellerPage`, account-scoped seller onboarding service, seller route guard |
 | NPM-04A | New Product Seller Profile Setup | `/dashboard/seller-center/setup` | Implemented as a four-step browser-local New Product seller profile with personal/contact details, memory-only identity document staging, public store details, conditional business fields, fulfilment preferences, agreements, and a successful prototype completion state | `SellerSetupPage`, seller setup service and types |
 | NPM-04B | New Product Category and Attribute Configuration | `/dashboard/seller-center/new-products/categories` | Implemented with frontend-session protection, the 23-category catalogue, subcategory selection, template preview, and basic custom parent templates | `CategoryConfigurationPage`, seller setup service, product taxonomy and attribute templates |
 | NPM-01 | New Product Marketplace Landing Page | `/new-products` | Implemented with local fixture data | `PublicShell`, `ProductCard`, product catalogue |
@@ -254,6 +259,20 @@ To maintain a clean, scalable, and professional repository, the following rules 
 - Boundary: there are no seeded returns, checkout-failure events, public buyer warnings, predictive models, or reliable cohort denominators for return rates.
 
 This concludes the structural specification for the CONFLUMIX repository.
+
+## Group 45 — Shared Orders, Transactions, and Reviews
+
+- `/account/orders` provides an authenticated overview of attributable New Product orders, Reuse offers, and task workrooms while retaining each workflow's real status, role, history, and valid routes.
+- Reuse offers are explicitly distinguished from completed transactions. Donation fixtures are excluded because they are not reliably attributable to the signed-in account.
+- `/account/reviews` provides the conditional shared review-management structure. It intentionally exposes no ratings, aggregates, submission, or edit controls because no persisted review model, eligibility policy, or moderation lifecycle exists.
+- Shared account interfaces are implemented in `apps/web/src/components/account/`; both pages use existing browser-local services and do not add payment, transaction, review, or authorization backends.
+
+## Group 46 — Verification and Account Settings
+
+- `/account/settings` reuses the authenticated session and shared profile service for account information, preferred locality, public-profile visibility, password-recovery navigation, and genuine sign-out behavior.
+- Locality and privacy changes persist through the existing browser-local profile service. Notification delivery preferences, session/device management, two-factor authentication, email changes, and account deletion are omitted because supporting infrastructure does not exist.
+- `/account/verification` summarizes only the existing seller-onboarding review state and links permitted continuation to Seller Center. It does not collect sensitive documents or create a parallel verification submission.
+- Seller review is a browser-local prototype workflow. There is no NADRA, SECP, FBR, banking, government, or secure reviewer/upload integration, and no status is represented as legal identity or regulatory verification.
 # New Product Shop Sections
 
 - `/dashboard/new-products/sections` is the shared Seller Center management route for flat, seller-defined storefront sections.
