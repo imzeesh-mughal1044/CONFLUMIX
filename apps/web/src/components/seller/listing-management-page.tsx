@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { PublicShell } from "@/components/public/public-shell";
+import {SkeletonTable} from "@/components/system/async-state";
 import { readAuthSession } from "@/lib/auth";
 import { createPendingOperation, readManagedListings, readPendingOperation } from "@/services/listing-management";
 import { promotionalPriceForListing, readPromotions } from "@/services/promotions";
@@ -36,7 +37,7 @@ export function ListingManagementPage() {
   function togglePage(){ setSelected((current)=>{ const next=new Set(current); visible.forEach((item)=>{ if(allPageSelected) next.delete(item.id); else next.add(item.id); }); return next; }); }
   function clearFilters(){ setQuery("");setStatus("all");setCategory("all");setSubcategory("all"); }
   function openPreview(type=operation, ids=Array.from(selected)){ createPendingOperation(sellerRef.current,storeRef.current,records??[],{type,value:value===""?undefined:Number(value),selectedIds:ids});router.push("/dashboard/new-products/bulk-preview"); }
-  if(records===null||authorized===null)return <PublicShell><div className="manage-products page-container"><p className="management-loading" role="status">Loading your products…</p></div></PublicShell>;
+  if(records===null||authorized===null)return <PublicShell><div className="manage-products page-container"><SkeletonTable columns={6} label="Loading your products"/></div></PublicShell>;
   if(!authorized)return <PublicShell><div className="store-state page-container"><p className="section-kicker">Private seller workspace</p><h1>Sign in to manage products.</h1><Link className="button button--primary" href="/auth/login?next=/dashboard/new-products/products">Sign in</Link></div></PublicShell>;
   const active=records.filter((item)=>item.status==="active").length,drafts=records.filter((item)=>item.status==="draft").length,out=records.filter((item)=>item.quantity===0).length;
   return <PublicShell><div className="manage-products page-container">

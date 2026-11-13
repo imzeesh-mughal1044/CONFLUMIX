@@ -9,6 +9,7 @@ import { readAuthSession, type AuthSession } from "@/lib/auth";
 import { findDonationResource } from "@/services/donations";
 import type { DonationManagedClaim } from "@/types/donations";
 import { PublicShell } from "@/components/public/public-shell";
+import {SkeletonTable} from "@/components/system/async-state";
 
 type StatusFilter = "all" | "pending" | "approved" | "reserved" | "rejected" | "completed";
 type ReviewAction = "approve" | "reject" | "reserve" | "schedule";
@@ -77,7 +78,7 @@ export function DonationClaimsManagement() {
   };
   const activeFilters=query||status!=="all"||requesterType!=="all"||reservation!=="all"||handover!=="all";
 
-  if(!session)return <PublicShell><div className="donation-admin-loading page-container" role="status"><span>Loading authorized claim workspace…</span></div></PublicShell>;
+  if(!session)return <PublicShell><div className="donation-admin-loading page-container"><SkeletonTable columns={5} label="Loading authorized claim workspace"/></div></PublicShell>;
 
   return <PublicShell><div className="donation-admin"><div className="page-container">
     <nav className="donation-admin__nav" aria-label="Donation management"><Link href="/dashboard">Dashboard</Link><Link href="/donations/resources">Donation resources</Link><Link href="/donations/new">Donate a resource</Link><Link href="/dashboard/donations/matching">Matching</Link><span aria-current="page">Claims</span></nav>
