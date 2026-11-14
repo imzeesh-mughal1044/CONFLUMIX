@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { PublicShell } from "@/components/public/public-shell";
+import {SkeletonGrid} from "@/components/system/async-state";
 import { readAuthSession, type AuthSession } from "@/lib/auth";
 import {
   closeAuthoredTask,
@@ -123,11 +124,7 @@ export function PostedTasksPage() {
   if (!ready)
     return (
       <PublicShell>
-        <div className="page-container task-dashboard-loading" role="status">
-          <div />
-          <div />
-          <div />
-        </div>
+        <div className="page-container task-dashboard-loading"><SkeletonGrid kind="task" count={4} label="Loading your posted tasks"/></div>
       </PublicShell>
     );
 

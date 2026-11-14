@@ -1,3 +1,4 @@
 import { Suspense } from "react";
 import { TaskBrowser } from "@/components/tasks/task-browser";
-export default function BrowseTasksPage(){return <Suspense fallback={<div className="route-loading">Loading tasks…</div>}><TaskBrowser/></Suspense>}
+import {PageLoadingState} from "@/components/system/async-state";
+export default function BrowseTasksPage(){return <Suspense fallback={<PageLoadingState label="Loading tasks" kind="task"/>}><TaskBrowser/></Suspense>}

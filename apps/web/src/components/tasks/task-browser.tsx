@@ -11,6 +11,7 @@ import {
 } from "@/types/tasks";
 import { Breadcrumb, PublicShell } from "@/components/public/public-shell";
 import { Icon } from "@/components/public/icons";
+import {EmptyState} from "@/components/system/async-state";
 import { TaskCard } from "./task-card";
 
 const categorySlugs = Object.fromEntries(
@@ -34,8 +35,7 @@ export function TaskBrowser() {
     closeRef = useRef<HTMLButtonElement>(null);
   const [search, setSearch] = useState(params.get("q") ?? ""),
     [filtersOpen, setFiltersOpen] = useState(false),
-    [visible, setVisible] = useState(6),
-    [loading, setLoading] = useState(true);
+    [visible, setVisible] = useState(6);
   const rawCategory = params.get("category") ?? "",
     category =
       categorySlugs[rawCategory] ??
@@ -88,10 +88,6 @@ export function TaskBrowser() {
     locality,
     ...skills,
   ].filter(Boolean).length;
-  useEffect(() => {
-    const id = window.setTimeout(() => setLoading(false), 180);
-    return () => window.clearTimeout(id);
-  }, []);
   useEffect(() => {
     if (!filtersOpen) return;
     document.body.style.overflow = "hidden";
@@ -383,13 +379,7 @@ export function TaskBrowser() {
               </div>
             </aside>
             <main className="task-results">
-              {loading ? (
-                <div className="task-skeleton-list" aria-label="Loading tasks">
-                  {Array.from({ length: 4 }).map((_, index) => (
-                    <div key={index} />
-                  ))}
-                </div>
-              ) : items.length ? (
+              {items.length ? (
                 <>
                   <div className="task-list">
                     {items.slice(0, visible).map((task) => (
@@ -407,25 +397,7 @@ export function TaskBrowser() {
                   )}
                 </>
               ) : (
-                <div className="empty-state">
-                  <span>
-                    <Icon name="search" size={28} />
-                  </span>
-                  <h2>No tasks match your criteria</h2>
-                  <p>
-                    Clear the search or remove filters to see more available
-                    opportunities.
-                  </p>
-                  <div>
-                    <button
-                      className="button button--primary"
-                      type="button"
-                      onClick={clearAll}
-                    >
-                      Browse all tasks
-                    </button>
-                  </div>
-                </div>
+                <EmptyState title="No Tasks Found" description="No tasks currently match your selected filters. Try changing your search criteria." actions={[{label:"Clear Filters",onClick:clearAll,variant:"primary"},{label:"Explore Other Tasks",href:"/tasks",variant:"secondary"}]} />
               )}
             </main>
           </div>

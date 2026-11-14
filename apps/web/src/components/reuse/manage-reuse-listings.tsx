@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { PublicShell } from "@/components/public/public-shell";
+import {SkeletonTable} from "@/components/system/async-state";
 import { readAuthSession } from "@/lib/auth";
 import { allReuseListings, reuseListingEvent } from "@/services/reuse";
 import { readSellerOnboarding } from "@/services/seller-onboarding";
@@ -83,7 +84,7 @@ export function ManageReuseListings() {
     router.replace(`${pathname}${next.size ? `?${next}` : ""}`);
   }
 
-  if (state === "loading") return <PublicShell><div className="route-loading" role="status">Loading your Reuse listings…</div></PublicShell>;
+  if (state === "loading") return <PublicShell><div className="reuse-management page-container"><SkeletonTable columns={6} label="Loading your Reuse listings"/></div></PublicShell>;
   if (state === "permission") return <PublicShell><Boundary title="Reuse seller access required" text="This account has not started Reuse seller setup." href="/become-a-seller" action="Start seller setup" /></PublicShell>;
   if (state === "error") return <PublicShell><Boundary title="Listings could not be loaded" text="Your browser-local listing records were not changed." onRetry={() => { setState("loading"); void load(); }} /></PublicShell>;
 

@@ -4,6 +4,7 @@ import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Breadcrumb, PublicShell } from "@/components/public/public-shell";
 import { Icon } from "@/components/public/icons";
+import {EmptyState, ErrorState, SkeletonGrid} from "@/components/system/async-state";
 import { localities } from "@/data/marketplace";
 import { reuseCategories } from "@/data/reuse";
 import { browseReuse } from "@/services/reuse";
@@ -77,6 +78,8 @@ export function ReuseBrowser() {
     [],
   );
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
+  const [reload, setReload] = useState(0);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [visible, setVisible] = useState(12);
   const query = useMemo<ReuseQuery>(
@@ -107,18 +110,17 @@ export function ReuseBrowser() {
   );
   useEffect(() => {
     let active = true;
-    queueMicrotask(() => setLoading(true));
+    queueMicrotask(() => { setLoading(true); setLoadError(false); });
     browseReuse(query).then((result) => {
       if (active) {
         setItems(result);
         setVisible(12);
-        setLoading(false);
       }
-    });
+    }).catch(() => { if (active) setLoadError(true); }).finally(() => { if (active) setLoading(false); });
     return () => {
       active = false;
     };
-  }, [query]);
+  }, [query, reload]);
   useEffect(() => {
     if (filtersOpen) {
       closeButton.current?.focus();
@@ -404,9 +406,9 @@ export function ReuseBrowser() {
             </aside>
             <section className="reuse-results" aria-busy={loading}>
               {loading ? (
-                <div className="reuse-state" role="status">
-                  Loading Reuse listings…
-                </div>
+                <SkeletonGrid kind="reuse" label="Loading Reuse listings" />
+              ) : loadError ? (
+                <ErrorState title="Reuse listings could not be loaded" description="We couldn't load these listings. Your search and filters have been preserved." onRetry={() => setReload((value) => value + 1)} />
               ) : items.length ? (
                 <>
                   <div className="reuse-grid">
@@ -425,21 +427,7 @@ export function ReuseBrowser() {
                   )}
                 </>
               ) : (
-                <div className="reuse-state">
-                  <Icon name="search" size={30} />
-                  <h2>No listings match these filters</h2>
-                  <p>
-                    Change the search or clear filters. No replacement records
-                    have been fabricated.
-                  </p>
-                  <button
-                    className="button button--primary"
-                    type="button"
-                    onClick={clearAll}
-                  >
-                    Clear filters
-                  </button>
-                </div>
+                <EmptyState title="No Reuse Items Found" description="There are currently no items matching your search. Try adjusting your filters or exploring other categories." actions={[{label:"Clear Filters",onClick:clearAll,variant:"primary"},{label:"Explore Reuse Listings",href:"/reuse",variant:"secondary"}]} />
               )}
             </section>
           </div>

@@ -2,6 +2,7 @@
 
 import { forwardRef, useId, useState, type InputHTMLAttributes } from "react";
 import { EyeIcon, EyeOffIcon } from "./icons";
+import {LoadingButton} from "@/components/system/async-state";
 
 type FieldProps = InputHTMLAttributes<HTMLInputElement> & {
   label: string;
@@ -25,5 +26,5 @@ export function PasswordField({ label, error, hint, id, ...props }: FieldProps) 
 }
 
 export function SubmitButton({ children, loading, disabled }: { children: React.ReactNode; loading?: boolean; disabled?: boolean }) {
-  return <button className="primary-button" type="submit" disabled={disabled || loading}>{loading && <span className="spinner" aria-hidden="true"/>}<span>{loading ? "Please wait…" : children}</span></button>;
+  return <LoadingButton className="primary-button" type="submit" loading={Boolean(loading)} loadingLabel="Please wait…" disabled={disabled}>{children}</LoadingButton>;
 }
